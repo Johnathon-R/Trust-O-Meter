@@ -28,16 +28,16 @@ const StarRating: React.FC<StarRatingProps> = ({
           type="button"
           disabled={readonly}
           onClick={() => !readonly && onRatingChange(star)}
-          className={`transition-all duration-300 ${
-            readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110 active:scale-95'
+          className={`transition-all duration-200 ${
+            readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'
           }`}
         >
           <Star
-            className={`${sizeClasses[size]} transition-all duration-300 ${
+            className={`${sizeClasses[size]} transition-all duration-200 ${
               star <= rating
-                ? 'text-yellow-400 fill-yellow-400 drop-shadow-lg shadow-yellow-400/50'
-                : 'text-gray-600 hover:text-gray-400'
-            } ${!readonly && star <= rating ? 'animate-pulse' : ''}`}
+                ? 'text-yellow-400 fill-yellow-400'
+                : 'text-gray-300 hover:text-gray-400'
+            }`}
           />
         </button>
       ))}

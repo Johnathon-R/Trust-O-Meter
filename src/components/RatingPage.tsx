@@ -71,25 +71,25 @@ const RatingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="font-orbitron font-bold text-4xl md:text-5xl text-white mb-4">
+        <div className="text-center mb-8">
+          <h1 className="font-inter font-bold text-3xl text-gray-900 mb-2">
             Submit Your Rating
           </h1>
-          <p className="font-inter text-xl text-gray-300">
+          <p className="font-inter text-lg text-gray-600">
             Rate your experience on the Algorand blockchain
           </p>
         </div>
 
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-cyan-900/30 rounded-3xl p-8 shadow-2xl shadow-cyan-500/5">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           {/* Rating Section */}
           <div className="mb-8">
-            <label className="font-orbitron font-semibold text-lg text-white mb-4 block">
+            <label className="font-inter font-semibold text-lg text-gray-900 mb-4 block">
               Your Rating
             </label>
             <StarRating rating={rating} onRatingChange={setRating} />
-            <p className="font-inter text-gray-400 mt-2 text-center">
+            <p className="font-inter text-gray-500 mt-2 text-center">
               {rating === 0 && 'Select a rating'}
               {rating === 1 && 'Poor experience'}
               {rating === 2 && 'Below average'}
@@ -101,12 +101,12 @@ const RatingPage: React.FC = () => {
 
           {/* Event Name Section */}
           <div className="mb-8">
-            <label className="font-orbitron font-semibold text-lg text-white mb-4 block">
+            <label className="font-inter font-semibold text-lg text-gray-900 mb-4 block">
               Event Name
             </label>
             <div className="space-y-4">
               <select 
-                className="w-full bg-gray-700/50 border border-cyan-900/30 rounded-xl px-4 py-3 text-white font-inter focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
               >
@@ -120,7 +120,7 @@ const RatingPage: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Enter custom event name"
-                  className="w-full bg-gray-700/50 border border-cyan-900/30 rounded-xl px-4 py-3 text-white font-inter focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   onChange={(e) => setEventName(e.target.value)}
                 />
               )}
@@ -132,13 +132,13 @@ const RatingPage: React.FC = () => {
             {!walletConnected ? (
               <button
                 onClick={handleConnectWallet}
-                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-orbitron font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 flex items-center justify-center space-x-2"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-inter font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
               >
                 <Wallet className="w-5 h-5" />
                 <span>Connect Wallet</span>
               </button>
             ) : (
-              <div className="flex items-center justify-center space-x-2 text-green-400 font-inter">
+              <div className="flex items-center justify-center space-x-2 text-green-600 font-inter">
                 <Wallet className="w-5 h-5" />
                 <span>Wallet Connected</span>
               </div>
@@ -149,24 +149,24 @@ const RatingPage: React.FC = () => {
           <button
             onClick={handleSubmitRating}
             disabled={isSubmitting || !walletConnected || rating === 0}
-            className={`w-full py-4 px-6 rounded-xl font-orbitron font-semibold text-lg transition-all duration-300 flex items-center justify-center space-x-2 ${
+            className={`w-full py-3 px-6 rounded-lg font-inter font-medium transition-colors duration-200 flex items-center justify-center space-x-2 ${
               isSubmitting || !walletConnected || rating === 0
-                ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white hover:shadow-2xl hover:shadow-cyan-500/30 hover:scale-[1.02]'
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
           >
-            <Send className={`w-5 h-5 ${isSubmitting ? 'animate-pulse' : ''}`} />
+            <Send className="w-5 h-5" />
             <span>
-              {isSubmitting ? 'Submitting to Blockchain...' : 'Submit Rating'}
+              {isSubmitting ? 'Submitting...' : 'Submit Rating'}
             </span>
           </button>
 
           {/* Message Display */}
           {message && (
-            <div className={`mt-6 p-4 rounded-xl flex items-center space-x-2 ${
-              message.type === 'success' ? 'bg-green-900/30 border border-green-500/30 text-green-400' :
-              message.type === 'error' ? 'bg-red-900/30 border border-red-500/30 text-red-400' :
-              'bg-blue-900/30 border border-blue-500/30 text-blue-400'
+            <div className={`mt-6 p-4 rounded-lg flex items-center space-x-2 ${
+              message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' :
+              message.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' :
+              'bg-blue-50 border border-blue-200 text-blue-700'
             }`}>
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span className="font-inter">{message.text}</span>
