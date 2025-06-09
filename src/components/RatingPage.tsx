@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Star, Send, Wallet, AlertCircle } from 'lucide-react';
+import { Star, Send, AlertCircle } from 'lucide-react';
 import StarRating from './StarRating';
-import { connectWallet, submitRating } from '../utils/algorand';
+import { submitRating } from '../utils/algorand';
 
 const RatingPage: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
   const [eventName, setEventName] = useState<string>('');
+  const [customEventName, setCustomEventName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [walletConnected, setWalletConnected] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
   const eventOptions = [
@@ -20,51 +20,40 @@ const RatingPage: React.FC = () => {
     'Custom Event'
   ];
 
-  const handleConnectWallet = async () => {
-    try {
-      setMessage({ type: 'info', text: 'Connecting to wallet...' });
-      const success = await connectWallet();
-      setWalletConnected(success);
-      if (success) {
-        setMessage({ type: 'success', text: 'Wallet connected successfully!' });
-      } else {
-        setMessage({ type: 'error', text: 'Failed to connect wallet. Please try again.' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Error connecting wallet. Please make sure Pera Wallet or AlgoSigner is installed.' });
-    }
-  };
-
   const handleSubmitRating = async () => {
     if (rating === 0) {
       setMessage({ type: 'error', text: 'Please select a rating before submitting.' });
       return;
     }
 
-    if (!eventName.trim()) {
-      setMessage({ type: 'error', text: 'Please enter an event name.' });
-      return;
-    }
-
-    if (!walletConnected) {
-      setMessage({ type: 'error', text: 'Please connect your wallet first.' });
+    // Determine the final event name
+    let finalEventName = eventName;
+    if (eventName === 'Custom Event') {
+      if (!customEventName.trim()) {
+        setMessage({ type: 'error', text: 'Please enter a custom event name.' });
+        return;
+      }
+      finalEventName = customEventName.trim();
+    } else if (!eventName.trim()) {
+      setMessage({ type: 'error', text: 'Please select or enter an event name.' });
       return;
     }
 
     setIsSubmitting(true);
-    setMessage({ type: 'info', text: 'Submitting rating to Algorand blockchain...' });
+    setMessage({ type: 'info', text: 'Submitting your rating...' });
 
     try {
-      const success = await submitRating(rating, eventName);
+      const success = await submitRating(rating, finalEventName);
       if (success) {
-        setMessage({ type: 'success', text: 'Rating submitted successfully to the blockchain!' });
+        setMessage({ type: 'success', text: 'Rating submitted successfully!' });
         setRating(0);
         setEventName('');
+        setCustomEventName('');
       } else {
         setMessage({ type: 'error', text: 'Failed to submit rating. Please try again.' });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error submitting rating. Please check your wallet and try again.' });
+      setMessage({ type: 'error', text: 'Error submitting rating. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -78,7 +67,7 @@ const RatingPage: React.FC = () => {
             Submit Your Rating
           </h1>
           <p className="font-inter text-lg text-gray-600">
-            Rate your experience on the Algorand blockchain
+            Share your experience and help others make informed decisions
           </p>
         </div>
 
@@ -108,7 +97,12 @@ const RatingPage: React.FC = () => {
               <select 
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={eventName}
-                onChange={(e) => setEventName(e.target.value)}
+                onChange={(e) => {
+                  setEventName(e.target.value);
+                  if (e.target.value !== 'Custom Event') {
+                    setCustomEventName('');
+                  }
+                }}
               >
                 <option value="">Select an event type...</option>
                 {eventOptions.map((option) => (
@@ -119,38 +113,22 @@ const RatingPage: React.FC = () => {
               {eventName === 'Custom Event' && (
                 <input
                   type="text"
-                  placeholder="Enter custom event name"
+                  placeholder="Enter your custom event name"
+                  value={customEventName}
+                  onChange={(e) => setCustomEventName(e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) => setEventName(e.target.value)}
+                  autoFocus
                 />
               )}
             </div>
           </div>
 
-          {/* Wallet Connection */}
-          <div className="mb-8">
-            {!walletConnected ? (
-              <button
-                onClick={handleConnectWallet}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-inter font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <Wallet className="w-5 h-5" />
-                <span>Connect Wallet</span>
-              </button>
-            ) : (
-              <div className="flex items-center justify-center space-x-2 text-green-600 font-inter">
-                <Wallet className="w-5 h-5" />
-                <span>Wallet Connected</span>
-              </div>
-            )}
-          </div>
-
           {/* Submit Button */}
           <button
             onClick={handleSubmitRating}
-            disabled={isSubmitting || !walletConnected || rating === 0}
+            disabled={isSubmitting || rating === 0}
             className={`w-full py-3 px-6 rounded-lg font-inter font-medium transition-colors duration-200 flex items-center justify-center space-x-2 ${
-              isSubmitting || !walletConnected || rating === 0
+              isSubmitting || rating === 0
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
@@ -172,6 +150,17 @@ const RatingPage: React.FC = () => {
               <span className="font-inter">{message.text}</span>
             </div>
           )}
+
+          {/* Info Section */}
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h3 className="font-inter font-medium text-blue-900 mb-2">How it works</h3>
+            <ul className="space-y-1 text-sm text-blue-700">
+              <li>• Your rating is stored securely in your browser</li>
+              <li>• All submissions are completely anonymous</li>
+              <li>• Data persists between sessions</li>
+              <li>• View analytics on the Analytics page</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
