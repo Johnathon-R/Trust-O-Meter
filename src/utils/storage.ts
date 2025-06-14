@@ -1,5 +1,8 @@
+import algosdk from "algosdk";
+
+
 // Local storage utilities for persisting ratings data
-export interface RatingData {
+export type RatingData = {
   id: string;
   rating: number;
   eventName: string;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './components/HomePage';
-import RatingPage from './components/RatingPage';
-import ViewFeedbackPage from './components/ViewFeedbackPage';
-import AboutPage from './components/AboutPage';
-import CommunityPage from './components/CommunityPage';
-import SettingsPage from './components/SettingsPage';
-import Navigation from './components/Navigation';
+import HomePage from './pages/HomePage';
+import RatingPage from './pages/RatingPage';
+import ViewFeedbackPage from './pages/ViewFeedbackPage';
+import AboutPage from './pages/AboutPage';
+import CommunityPage from './pages/CommunityPage';
+import SettingsPage from './pages/SettingsPage';
+import Navigation from './pages/Navigation';
 
 function App() {
   return (

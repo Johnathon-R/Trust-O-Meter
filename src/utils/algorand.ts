@@ -1,32 +1,43 @@
 // Simplified rating system without wallet requirement
 // Note: This maintains the blockchain concept while removing unnecessary complexity
 
+import algosdk from "algosdk";
 import { saveRating, calculateStats } from './storage';
+
+// Connect to Algorand Testnet via Algonode
+const ALGOD_SERVER = "https://testnet-api.algonode.cloud";
+const algodClient = new algosdk.Algodv2("", ALGOD_SERVER, "");
 
 /**
  * Submit rating (simplified without wallet requirement)
  */
-export const submitRating = async (rating: number, eventName: string): Promise<boolean> => {
+export const submitRating = async (
+  rating: number, eventName: string, senderAddress: string, signTxn: (txn: algosdk.Transaction) => Promise<Uint8Array>): Promise<boolean> => {
   try {
-    // Simulate processing time for better UX
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // In a real blockchain implementation, this would:
-    // 1. Create a transaction with the rating data
-    // 2. Submit to the Algorand network
-    // 3. Wait for confirmation
-    
-    // For now, we'll simulate a high success rate
-    const success = Math.random() > 0.05; // 95% success rate
-    
-    if (success) {
-      // Save rating to local storage when submission succeeds
-      saveRating(rating, eventName);
-      console.log('Rating submitted:', { rating, eventName, timestamp: new Date() });
+    const params = await algodClient.getTransactionParams().do();
+
+    const noteObject = {
+      rating, eventName, timestamp: new Date().toISOString()
     }
+
+    const note = new TextEncoder().encode(JSON.stringify(noteObject));
+
+    const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: senderAddress, to: senderAddress, amount: 0, note, suggestedParams: params,
+    });
+
+    const signedTxn = await signTxn(txn);
+
+    // FOR REAL IMPLEMENTATION UNCOMMENT THIS LINE
+    //const { txId } = await algodClient.sendRawTransaction(signedTxn).do();
+    //console.log("sent TX:", txId);
+
+    // Wait for conformation
+    //await algosdk.waitForConfirmation(algodClient, txId, 3);
     
-    return success;
-    
+    // Also save locally for UI use
+    saveRating(rating, eventName);
+    return true;
   } catch (error) {
     console.error('Rating submission error:', error);
     return false;

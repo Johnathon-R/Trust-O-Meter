@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Trash2 } from 'lucide-react';
-import StarRating from './StarRating';
+import StarRating from '../components/Stars';
 import { getRatingsData } from '../utils/algorand';
 import { clearAllRatings, exportRatings } from '../utils/storage';
 
@@ -154,7 +154,7 @@ const ViewFeedbackPage: React.FC = () => {
               {stats.averageRating.toFixed(1)}
             </h3>
             <p className="font-inter text-gray-600 mb-3">Average Rating</p>
-            <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => {}} readonly size="sm" />
+            <StarRating onChange={() => {}} />
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -236,7 +236,7 @@ const ViewFeedbackPage: React.FC = () => {
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100"
               >
                 <div className="flex items-center space-x-4">
-                  <StarRating rating={rating.rating} onRatingChange={() => {}} readonly size="sm" />
+                  <StarRating onChange={() => {}} />
                   <div>
                     <p className="font-inter font-medium text-gray-900">{rating.eventName}</p>
                     <p className="font-inter text-gray-500 text-sm">Your Rating</p>

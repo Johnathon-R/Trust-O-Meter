@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Star, Send, AlertCircle } from 'lucide-react';
-import StarRating from './StarRating';
+import { Send, AlertCircle } from 'lucide-react';
+import StarRating from '../components/Stars';
 import { submitRating } from '../utils/algorand';
+import algosdk from 'algosdk';
 
 const RatingPage: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
@@ -43,12 +44,24 @@ const RatingPage: React.FC = () => {
     setMessage({ type: 'info', text: 'Submitting your rating...' });
 
     try {
-      const success = await submitRating(rating, finalEventName);
+      /**
+       * 
+       * @brief Fake signing to simulate submission with fake account address
+       *         below
+       */
+      const fakeAccount = algosdk.generateAccount();
+
+      const mockSignTxn = async (txn: algosdk.Transaction): Promise<Uint8Array> => {
+        return txn.signTxn(fakeAccount.sk); // Fake signing
+      }
+
+
+      const success = await submitRating(rating, finalEventName, fakeAccount.addr, mockSignTxn);
       if (success) {
         setMessage({ type: 'success', text: 'Rating submitted successfully!' });
-        setRating(0);
-        setEventName('');
-        setCustomEventName('');
+        setRating(rating);
+        setEventName(eventName);
+        setCustomEventName(customEventName);
       } else {
         setMessage({ type: 'error', text: 'Failed to submit rating. Please try again.' });
       }
@@ -77,7 +90,7 @@ const RatingPage: React.FC = () => {
             <label className="font-inter font-semibold text-lg text-gray-900 mb-4 block">
               Your Rating
             </label>
-            <StarRating rating={rating} onRatingChange={setRating} />
+            <StarRating value={rating} onChange={setRating} />
             <p className="font-inter text-gray-500 mt-2 text-center">
               {rating === 0 && 'Select a rating'}
               {rating === 1 && 'Poor experience'}
