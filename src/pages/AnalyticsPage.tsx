@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } from 'lucide-react';
 import StarRating from './StarRating';
 import { getRatingsData } from '../utils/algorand';
+import RatingHistogram from '../hooks/histogram';
 
 interface RatingData {
   rating: number;
@@ -16,7 +17,7 @@ interface RatingStats {
   ratingDistribution: number[];
 }
 
-const ViewFeedbackPage: React.FC = () => {
+const AnalyticsPage: React.FC = () => {
   const [stats, setStats] = useState<RatingStats>({
     averageRating: 4.2,
     totalRatings: 147,
@@ -137,7 +138,7 @@ const ViewFeedbackPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Rating Distribution */}
+        {/* Rating Distribution */} {/*}
         <div className={`group relative mb-8 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 dark:from-blue-600/20 dark:to-purple-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
           <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
@@ -146,7 +147,7 @@ const ViewFeedbackPage: React.FC = () => {
               Rating Distribution
             </h2>
             <div className="space-y-4">
-              {[5, 4, 3, 2, 1].map((stars) => {
+              {[5, 4, 3, 2, 1].map((bin, i) => {
                 const count = stats.ratingDistribution[stars - 1];
                 const percentage = (count / stats.totalRatings) * 100;
                 
@@ -170,6 +171,11 @@ const ViewFeedbackPage: React.FC = () => {
               })}
             </div>
           </div>
+        </div>
+        */}
+
+        <div>
+          <RatingHistogram />
         </div>
 
         {/* Recent Ratings */}
@@ -221,4 +227,4 @@ const ViewFeedbackPage: React.FC = () => {
   );
 };
 
-export default ViewFeedbackPage;
+export default AnalyticsPage;
