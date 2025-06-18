@@ -92,12 +92,12 @@ const RatingPage: React.FC = () => {
             </label>
             <StarRating value={rating} onChange={setRating} />
             <p className="font-inter text-gray-500 mt-2 text-center">
-              {rating === 0 && 'Select a rating'}
-              {rating === 1 && 'Poor experience'}
-              {rating === 2 && 'Below average'}
-              {rating === 3 && 'Average experience'}
-              {rating === 4 && 'Good experience'}
-              {rating === 5 && 'Excellent experience'}
+              {(rating === 0) && 'Select a rating'}
+              {(rating <= 1 && rating > 0) && 'Poor experience'}
+              {(rating <= 2 && rating > 1) && 'Below average'}
+              {(rating <= 3 && rating > 2) && 'Average experience'}
+              {(rating <= 4 && rating > 3) && 'Good experience'}
+              {(rating <= 5 && rating > 4) && 'Excellent experience'}
             </p>
           </div>
 

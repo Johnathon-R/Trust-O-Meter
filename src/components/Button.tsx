@@ -1,4 +1,4 @@
-import React, { useState, useEffect }  from "react";
+import React, { useState, useEffect } from "react";
 import { baseButtonStyles, variantButtonClasses } from "../styles/Constants";
 
 /**
@@ -9,7 +9,7 @@ type ButtonProps = {
     onClick?: () => void;
     className?: string;
     variant?: "primary" | "secondary" | "ghost";
-    type?: "button" | "submit" | "reset"; 
+    type?: "button" | "submit" | "reset";
 };
 
 /**
@@ -18,12 +18,12 @@ type ButtonProps = {
  * @returns 
  */
 const Button: React.FC<ButtonProps> = ({
-    children, onClick, className="", variant="primary", type="button"}) => {
-    
+    children, onClick, className = "", variant = "primary", type = "button" }) => {
+
     // Type of button
     const variantClass = variantButtonClasses[variant] || baseButtonStyles;
     const finalClassName = `${baseButtonStyles} ${variantClass} ${className}`.trim();
-    
+
     // Button styling html
     return (
         <button type={type} onClick={onClick} className={finalClassName}>
