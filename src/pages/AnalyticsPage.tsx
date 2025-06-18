@@ -4,6 +4,28 @@ import StarRating from './StarRating';
 import { getRatingsData } from '../utils/algorand';
 import RatingHistogram from '../hooks/histogram';
 
+// Add the FloatingDotsBackground component at the top
+const FloatingDotsBackground = React.memo(() => {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-float"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}
+        >
+          <div className="w-2 h-2 bg-white rounded-full opacity-30"></div>
+        </div>
+      ))}
+    </div>
+  );
+});
+
 interface RatingData {
   rating: number;
   eventName: string;
@@ -70,6 +92,8 @@ const AnalyticsPage: React.FC = () => {
         <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 dark:bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-4000"></div>
       </div>
+
+      <FloatingDotsBackground />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
