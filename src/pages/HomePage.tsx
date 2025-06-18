@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, BarChart3, Shield, ArrowRight, Sparkles, Zap } from 'lucide-react';
 
+import { Button } from '../components/ui/Button';
+import { Card, CardContent } from '../components/ui/Card';
+
+import { getRatings } from '../utils/storage';
+import { arrayEqual } from 'algosdk/dist/types/utils/utils';
+
 const HomePage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -147,8 +153,56 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <br></br><br></br>
+
         </div>
       </div>
+
+      {/* Featured Ratings Cards */}
+      <div className='text-center'>
+        <h2 className="text-4xl font-bold mb-4 py-20 bg-charcoal text-white text-center px-6">Featured Ratings</h2>
+      </div>
+      <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        {getRatings().map(r => (
+          <div className="group relative flex-col">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
+            <div key={r.id} className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div>
+                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{r.eventName}</h3>
+                {/* <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">{r.rating}</p> */}
+              </div>
+              <div className=" flex gap-3">
+                {[...Array(5)].map((_, i) => {
+                  const fill = Math.min(Math.max(r.rating - i, 0), 1) * 100;
+                  return (
+                    <div key={i} className= "relative w-6 h-6">
+                      
+
+                      {/* Filled star (foreground mask) */}
+                      <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400" 
+                        style={{ width: `${fill}%` }}
+                      >
+                        <Star className={`w-6 h-6 fill-yellow-400`}/>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+
+      {/* Call to Action Section */}
+      <section className="py-20 bg-charcoal text-white text-center px-6">
+        <h2 className="text-4xl font-bold mb-4">Start Building Trust</h2>
+        <p className="text-lg mb-8">Rate your experiences—help everyone make smarter choices.</p>
+        <Button className="bg-electric-blue text-white text-lg px-8 py-4 rounded-xl hover:bg-indigo-700">
+          Get Started
+        </Button>
+      </section>
+
+      
     </div>
   );
 };

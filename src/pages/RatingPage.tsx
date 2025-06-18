@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Send, AlertCircle, Sparkles } from 'lucide-react';
-import StarRating from './StarRating';
+import StarRating from '../components/Stars';
 import { submitRating } from '../utils/algorand';
+import algosdk from 'algosdk';
 
 // Create a separate component for the floating dots
 const FloatingDotsBackground = React.memo(() => {
@@ -72,7 +73,18 @@ const RatingPage: React.FC = () => {
     setMessage({ type: 'info', text: 'Submitting rating to blockchain...' });
 
     try {
-      const success = await submitRating(rating, finalEventName);
+      /**
+       * 
+       * @brief Fake signing to simulate submission with fake account address
+       *         below
+       */
+      const fakeAccount = algosdk.generateAccount();
+
+      const mockSignTxn = async (txn: algosdk.Transaction): Promise<Uint8Array> => {
+        return txn.signTxn(fakeAccount.sk); // Fake signing
+      }
+
+      const success = await submitRating(rating, finalEventName, fakeAccount.addr, mockSignTxn);
       if (success) {
         setMessage({ type: 'success', text: 'Rating submitted successfully to the blockchain!' });
         setRating(0);
@@ -112,19 +124,18 @@ const RatingPage: React.FC = () => {
             Rate your experience on the Algorand blockchain
           </p>
         </div>
-
         <div className={`group relative transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
           <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
             
             {/* Rating Section */}
             <div className="mb-8">
-              <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 block flex items-center gap-2">
-                <Star className="w-6 h-6 text-yellow-400" />
+              <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
+                <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
                 Your Rating
               </label>
               <div className="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300">
-                <StarRating rating={rating} onRatingChange={setRating} />
+                <StarRating value={rating} onChange={setRating} />
                 <p className="font-inter text-gray-300 dark:text-gray-400 mt-4 text-center text-lg">
                   {rating === 0 && 'Select a rating'}
                   {rating > 0 && rating <= 1 && '⭐ Poor experience'}

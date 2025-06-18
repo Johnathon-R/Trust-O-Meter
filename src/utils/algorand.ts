@@ -1,18 +1,38 @@
-// Simplified rating system without wallet requirement
-// Note: This maintains the blockchain concept while removing unnecessary complexity
-
 import { saveRating, calculateStats } from './storage';
+import algosdk from 'algosdk';
 
 /**
  * Submit rating (simplified without wallet requirement)
  */
-export const submitRating = async (rating: number, eventName: string): Promise<boolean> => {
+export const submitRating = async (
+  rating: number, eventName: string, sender: string, signTxn: (txn: algosdk.Transaction) => Promise<Uint8Array>
+): Promise<boolean> => {
   try {
-    // Simulate blockchain submission delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Save locally for UI use
-    saveRating(rating, eventName);
+    const algodClient = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
+
+    const params = await algodClient.getTransactionParams().do();
+
+    console.log("Fetched params:", params);
+
+    const note = new TextEncoder().encode(JSON.stringify({ rating, eventName }));
+
+    const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: sender,
+      to: sender, // self-transfer to embed data
+      amount: 0,
+      note,
+      suggestedParams: params,
+    });
+
+    console.log("Unsigned txn:", txn);
+
+    const signedTxn = await signTxn(txn);
+    console.log("Signed txn:", signedTxn);
+
+    // ⚠️ COMMENT OUT BROADCAST if testing without TestNet ALGO
+    // const { txId } = await algodClient.sendRawTransaction(signedTxn).do();
+    // console.log("Submitted with txId:", txId);
+
     return true;
   } catch (error) {
     console.error('Rating submission error:', error);

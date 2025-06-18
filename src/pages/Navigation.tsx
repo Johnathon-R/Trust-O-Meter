@@ -7,7 +7,7 @@ const Navigation: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => location.pathname === path;
-  
+
   const navItems = [
     { path: '/rate', label: 'Rate', icon: Star },
     { path: '/feedback', label: 'Analytics', icon: BarChart3 },
@@ -15,7 +15,7 @@ const Navigation: React.FC = () => {
     { path: '/community', label: 'Community', icon: Users },
     { path: '/settings', label: 'Settings', icon: Settings },
   ];
-  
+
   return (
     <nav className="border-b border-white/10 bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -23,6 +23,7 @@ const Navigation: React.FC = () => {
           <Link 
             to="/" 
             className="group flex items-center space-x-3 text-white hover:text-blue-400 transition-all duration-300"
+
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -34,10 +35,10 @@ const Navigation: React.FC = () => {
               Trust-O-Meter
             </span>
           </Link>
-          
+
           <div className="hidden md:flex space-x-1">
             {navItems.map(({ path, label, icon: Icon }) => (
-              <Link 
+              <Link
                 key={path}
                 to={path} 
                 className={`group relative flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300 overflow-hidden ${
