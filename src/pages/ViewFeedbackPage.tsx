@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Trash2 } from 'lucide-react';
-import StarRating from '../components/Stars';
+import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } from 'lucide-react';
+import StarRating from './StarRating';
 import { getRatingsData } from '../utils/algorand';
-import { clearAllRatings, exportRatings } from '../utils/storage';
 
 interface RatingData {
-  id: string;
   rating: number;
   eventName: string;
   timestamp: Date;
@@ -20,15 +18,22 @@ interface RatingStats {
 
 const ViewFeedbackPage: React.FC = () => {
   const [stats, setStats] = useState<RatingStats>({
-    averageRating: 0,
-    totalRatings: 0,
-    recentRatings: [],
-    ratingDistribution: [0, 0, 0, 0, 0]
+    averageRating: 4.2,
+    totalRatings: 147,
+    recentRatings: [
+      { rating: 5, eventName: 'Conference Presentation', timestamp: new Date('2025-01-20T10:30:00') },
+      { rating: 4, eventName: 'Workshop Session', timestamp: new Date('2025-01-20T09:15:00') },
+      { rating: 3, eventName: 'Team Meeting', timestamp: new Date('2025-01-19T16:45:00') },
+      { rating: 5, eventName: 'Product Launch', timestamp: new Date('2025-01-19T14:20:00') },
+      { rating: 4, eventName: 'Customer Service', timestamp: new Date('2025-01-19T11:30:00') },
+    ],
+    ratingDistribution: [2, 8, 15, 45, 77]
   });
   const [loading, setLoading] = useState(false);
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    setIsVisible(true);
     loadRatingsData();
   }, []);
 
@@ -46,261 +51,171 @@ const ViewFeedbackPage: React.FC = () => {
     }
   };
 
-  const handleClearAllRatings = () => {
-    clearAllRatings();
-    setStats({
-      averageRating: 0,
-      totalRatings: 0,
-      recentRatings: [],
-      ratingDistribution: [0, 0, 0, 0, 0]
-    });
-    setShowClearConfirm(false);
-  };
-
-  const handleExportData = () => {
-    const data = exportRatings();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `trust-o-meter-ratings-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays === 1) return 'Yesterday';
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    
-    return date.toLocaleDateString();
+    return `${diffInDays}d ago`;
   };
 
-  const EmptyState = () => (
-    <div className="text-center py-12">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <BarChart3 className="w-8 h-8 text-gray-400" />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-colors duration-300">
+      {/* Animated background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 dark:bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 dark:bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-4000"></div>
       </div>
-      <h3 className="font-inter font-semibold text-lg text-gray-900 mb-2">
-        No Ratings Yet
-      </h3>
-      <p className="font-inter text-gray-600 mb-6 max-w-md mx-auto">
-        Start by submitting your first rating on the Rate page. Your ratings will be stored securely and displayed here.
-      </p>
-      <a
-        href="/rate"
-        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-inter font-medium hover:bg-blue-700 transition-colors duration-200"
-      >
-        <Star className="w-5 h-5 mr-2" />
-        Submit First Rating
-      </a>
-    </div>
-  );
 
-  if (stats.totalRatings === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="font-inter font-bold text-3xl text-gray-900 mb-2">
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className={`text-center mb-12 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="flex items-center justify-center mb-4">
+            <BarChart3 className="w-8 h-8 text-blue-400 dark:text-blue-300 mr-2" />
+            <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 dark:from-blue-300 dark:to-purple-300">
               Rating Analytics
             </h1>
-            <p className="font-inter text-lg text-gray-600">
-              Transparent feedback powered by blockchain technology
-            </p>
+            <Sparkles className="w-8 h-8 text-yellow-400 dark:text-yellow-300 ml-2" />
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-            <EmptyState />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="font-inter font-bold text-3xl text-gray-900 mb-2">
-            Rating Analytics
-          </h1>
-          <p className="font-inter text-lg text-gray-600">
+          <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
             Transparent feedback powered by blockchain technology
           </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                <Star className="w-6 h-6 text-blue-600" />
+        <div className={`grid md:grid-cols-3 gap-6 mb-8 transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 dark:from-blue-600/20 dark:to-purple-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+            <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-6 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                  <Star className="w-6 h-6 text-white" />
+                </div>
+                <TrendingUp className="w-5 h-5 text-green-400 dark:text-green-300" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
+                {stats.averageRating.toFixed(1)}
+              </h3>
+              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">Average Rating</p>
+              <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => {}} readonly size="sm" />
             </div>
-            <h3 className="font-inter font-bold text-2xl text-gray-900 mb-1">
-              {stats.averageRating.toFixed(1)}
-            </h3>
-            <p className="font-inter text-gray-600 mb-3">Average Rating</p>
-            <StarRating onChange={() => {}} />
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-green-600" />
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-blue-600/20 dark:from-green-600/20 dark:to-blue-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+            <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-6 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 dark:from-green-600 dark:to-blue-700 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <TrendingUp className="w-5 h-5 text-green-400 dark:text-green-300" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-500" />
+              <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
+                {stats.totalRatings.toLocaleString()}
+              </h3>
+              <p className="font-inter text-gray-300 dark:text-gray-400">Total Ratings</p>
             </div>
-            <h3 className="font-inter font-bold text-2xl text-gray-900 mb-1">
-              {stats.totalRatings.toLocaleString()}
-            </h3>
-            <p className="font-inter text-gray-600">Total Ratings</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-6 h-6 text-purple-600" />
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-600/20 dark:from-purple-600/20 dark:to-pink-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+            <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-6 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 dark:from-purple-600 dark:to-pink-700 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <Calendar className="w-5 h-5 text-gray-400 dark:text-gray-500" />
               </div>
-              <Calendar className="w-5 h-5 text-gray-400" />
+              <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
+                {stats.recentRatings.length}
+              </h3>
+              <p className="font-inter text-gray-300 dark:text-gray-400">Recent Reviews</p>
             </div>
-            <h3 className="font-inter font-bold text-2xl text-gray-900 mb-1">
-              {stats.recentRatings.length}
-            </h3>
-            <p className="font-inter text-gray-600">Recent Reviews</p>
           </div>
         </div>
 
         {/* Rating Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-          <h2 className="font-inter font-bold text-xl text-gray-900 mb-6">Rating Distribution</h2>
-          <div className="space-y-4">
-            {[5, 4, 3, 2, 1].map((stars) => {
-              const count = stats.ratingDistribution[stars - 1];
-              const percentage = stats.totalRatings > 0 ? (count / stats.totalRatings) * 100 : 0;
-              
-              return (
-                <div key={stars} className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2 w-16">
-                    <span className="font-inter text-gray-900">{stars}</span>
-                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+        <div className={`group relative mb-8 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 dark:from-blue-600/20 dark:to-purple-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+          <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+            <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6 text-blue-400 dark:text-blue-300" />
+              Rating Distribution
+            </h2>
+            <div className="space-y-4">
+              {[5, 4, 3, 2, 1].map((stars) => {
+                const count = stats.ratingDistribution[stars - 1];
+                const percentage = (count / stats.totalRatings) * 100;
+                
+                return (
+                  <div key={stars} className="flex items-center space-x-4 group/bar hover:scale-105 transition-transform duration-300">
+                    <div className="flex items-center space-x-2 w-16">
+                      <span className="font-inter text-white dark:text-gray-100 font-semibold">{stars}</span>
+                      <Star className="w-4 h-4 text-yellow-400 dark:text-yellow-300 fill-yellow-400 dark:fill-yellow-300" />
+                    </div>
+                    <div className="flex-1 bg-white/10 dark:bg-gray-700/50 rounded-full h-4 overflow-hidden backdrop-blur-lg">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 transition-all duration-1000 group-hover/bar:from-blue-400 group-hover/bar:to-purple-500 dark:group-hover/bar:from-blue-500 dark:group-hover/bar:to-purple-600"
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                    <div className="w-16 text-right">
+                      <span className="font-inter text-gray-300 dark:text-gray-400 font-semibold">{count}</span>
+                    </div>
                   </div>
-                  <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 transition-all duration-500"
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                  <div className="w-16 text-right">
-                    <span className="font-inter text-gray-600">{count}</span>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* Recent Ratings */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-inter font-bold text-xl text-gray-900">Recent Ratings</h2>
-            <div className="flex items-center space-x-3">
+        <div className={`group relative transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-600/20 dark:from-purple-600/20 dark:to-pink-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+          <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-purple-400 dark:text-purple-300" />
+                Recent Ratings
+              </h2>
               <button
                 onClick={loadRatingsData}
                 disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 disabled:opacity-50"
+                className="group/btn flex items-center space-x-2 px-4 py-2 bg-white/10 dark:bg-gray-700/50 text-blue-400 dark:text-blue-300 rounded-xl hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all duration-300 disabled:opacity-50 hover:scale-105"
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover/btn:rotate-180'} transition-transform duration-300`} />
                 <span className="font-inter font-medium">Refresh</span>
               </button>
             </div>
-          </div>
-          
-          <div className="space-y-4">
-            {stats.recentRatings.map((rating) => (
-              <div 
-                key={rating.id}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100"
-              >
-                <div className="flex items-center space-x-4">
-                  <StarRating onChange={() => {}} />
-                  <div>
-                    <p className="font-inter font-medium text-gray-900">{rating.eventName}</p>
-                    <p className="font-inter text-gray-500 text-sm">Your Rating</p>
+            
+            <div className="space-y-4">
+              {stats.recentRatings.map((rating, index) => (
+                <div 
+                  key={index}
+                  className="group/item flex items-center justify-between p-4 bg-white/5 dark:bg-gray-700/40 rounded-xl border border-white/10 dark:border-gray-600/50 hover:bg-white/10 dark:hover:bg-gray-600/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="group-hover/item:scale-110 transition-transform duration-300">
+                      <StarRating rating={rating.rating} onRatingChange={() => {}} readonly size="sm" />
+                    </div>
+                    <div>
+                      <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>
+                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Anonymous User</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">
+                      {formatTimeAgo(rating.timestamp)}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-inter text-gray-500 text-sm">
-                    {formatTimeAgo(rating.timestamp)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Data Management */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          <h2 className="font-inter font-bold text-xl text-gray-900 mb-6">Data Management</h2>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button
-              onClick={handleExportData}
-              className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg font-inter font-medium hover:bg-green-700 transition-colors duration-200"
-            >
-              <BarChart3 className="w-5 h-5" />
-              <span>Export Data</span>
-            </button>
-            
-            <button
-              onClick={() => setShowClearConfirm(true)}
-              className="flex items-center justify-center space-x-2 px-6 py-3 bg-red-600 text-white rounded-lg font-inter font-medium hover:bg-red-700 transition-colors duration-200"
-            >
-              <Trash2 className="w-5 h-5" />
-              <span>Clear All Ratings</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Clear Confirmation Modal */}
-        {showClearConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-8 max-w-md w-full">
-              <h3 className="font-inter font-bold text-xl text-gray-900 mb-4">
-                Clear All Ratings?
-              </h3>
-              <p className="font-inter text-gray-600 mb-6">
-                This action cannot be undone. All your ratings will be permanently deleted from local storage.
-              </p>
-              <div className="flex space-x-4">
-                <button
-                  onClick={() => setShowClearConfirm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-inter font-medium hover:bg-gray-200 transition-colors duration-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleClearAllRatings}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-inter font-medium hover:bg-red-700 transition-colors duration-200"
-                >
-                  Clear All
-                </button>
-              </div>
+              ))}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

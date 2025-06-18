@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
-import { Send, AlertCircle } from 'lucide-react';
-import StarRating from '../components/Stars';
+import React, { useState, useEffect } from 'react';
+import { Star, Send, AlertCircle, Sparkles } from 'lucide-react';
+import StarRating from './StarRating';
 import { submitRating } from '../utils/algorand';
-import algosdk from 'algosdk';
+
+// Create a separate component for the floating dots
+const FloatingDotsBackground = React.memo(() => {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-float"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}
+        >
+          <div className="w-2 h-2 bg-white rounded-full opacity-30"></div>
+        </div>
+      ))}
+    </div>
+  );
+});
 
 const RatingPage: React.FC = () => {
   const [rating, setRating] = useState<number>(0);
-  const [eventName, setEventName] = useState<string>('');
+  const [eventType, setEventType] = useState<string>('');
   const [customEventName, setCustomEventName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const eventOptions = [
     'Conference Presentation',
@@ -28,40 +54,30 @@ const RatingPage: React.FC = () => {
     }
 
     // Determine the final event name
-    let finalEventName = eventName;
-    if (eventName === 'Custom Event') {
+    let finalEventName = '';
+    if (eventType === 'Custom Event') {
       if (!customEventName.trim()) {
         setMessage({ type: 'error', text: 'Please enter a custom event name.' });
         return;
       }
       finalEventName = customEventName.trim();
-    } else if (!eventName.trim()) {
-      setMessage({ type: 'error', text: 'Please select or enter an event name.' });
+    } else if (eventType) {
+      finalEventName = eventType;
+    } else {
+      setMessage({ type: 'error', text: 'Please select an event type or enter a custom event name.' });
       return;
     }
 
     setIsSubmitting(true);
-    setMessage({ type: 'info', text: 'Submitting your rating...' });
+    setMessage({ type: 'info', text: 'Submitting rating to blockchain...' });
 
     try {
-      /**
-       * 
-       * @brief Fake signing to simulate submission with fake account address
-       *         below
-       */
-      const fakeAccount = algosdk.generateAccount();
-
-      const mockSignTxn = async (txn: algosdk.Transaction): Promise<Uint8Array> => {
-        return txn.signTxn(fakeAccount.sk); // Fake signing
-      }
-
-
-      const success = await submitRating(rating, finalEventName, fakeAccount.addr, mockSignTxn);
+      const success = await submitRating(rating, finalEventName);
       if (success) {
-        setMessage({ type: 'success', text: 'Rating submitted successfully!' });
-        setRating(rating);
-        setEventName(eventName);
-        setCustomEventName(customEventName);
+        setMessage({ type: 'success', text: 'Rating submitted successfully to the blockchain!' });
+        setRating(0);
+        setEventType('');
+        setCustomEventName('');
       } else {
         setMessage({ type: 'error', text: 'Failed to submit rating. Please try again.' });
       }
@@ -73,106 +89,120 @@ const RatingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="font-inter font-bold text-3xl text-gray-900 mb-2">
-            Submit Your Rating
-          </h1>
-          <p className="font-inter text-lg text-gray-600">
-            Share your experience and help others make informed decisions
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-all duration-500">
+      {/* Animated background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      </div>
+
+      {/* Floating particles - now using the memoized component */}
+      <FloatingDotsBackground />
+
+      <div className="relative z-10 max-w-2xl mx-auto">
+        <div className={`text-center mb-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="flex items-center justify-center mb-4">
+            <Sparkles className="w-8 h-8 text-yellow-400 mr-2" />
+            <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+              Submit Your Rating
+            </h1>
+            <Sparkles className="w-8 h-8 text-yellow-400 ml-2" />
+          </div>
+          <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
+            Rate your experience on the Algorand blockchain
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-          {/* Rating Section */}
-          <div className="mb-8">
-            <label className="font-inter font-semibold text-lg text-gray-900 mb-4 block">
-              Your Rating
-            </label>
-            <StarRating value={rating} onChange={setRating} />
-            <p className="font-inter text-gray-500 mt-2 text-center">
-              {rating === 0 && 'Select a rating'}
-              {rating === 1 && 'Poor experience'}
-              {rating === 2 && 'Below average'}
-              {rating === 3 && 'Average experience'}
-              {rating === 4 && 'Good experience'}
-              {rating === 5 && 'Excellent experience'}
-            </p>
-          </div>
+        <div className={`group relative transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+          <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+            
+            {/* Rating Section */}
+            <div className="mb-8">
+              <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 block flex items-center gap-2">
+                <Star className="w-6 h-6 text-yellow-400" />
+                Your Rating
+              </label>
+              <div className="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300">
+                <StarRating rating={rating} onRatingChange={setRating} />
+                <p className="font-inter text-gray-300 dark:text-gray-400 mt-4 text-center text-lg">
+                  {rating === 0 && 'Select a rating'}
+                  {rating > 0 && rating <= 1 && '⭐ Poor experience'}
+                  {rating > 1 && rating <= 2 && '⭐⭐ Below average'}
+                  {rating > 2 && rating <= 3 && '⭐⭐⭐ Average experience'}
+                  {rating > 3 && rating <= 4 && '⭐⭐⭐⭐ Good experience'}
+                  {rating > 4 && '⭐⭐⭐⭐⭐ Excellent experience'}
+                </p>
+              </div>
+            </div>
 
-          {/* Event Name Section */}
-          <div className="mb-8">
-            <label className="font-inter font-semibold text-lg text-gray-900 mb-4 block">
-              Event Name
-            </label>
-            <div className="space-y-4">
-              <select 
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={eventName}
-                onChange={(e) => {
-                  setEventName(e.target.value);
-                  if (e.target.value !== 'Custom Event') {
-                    setCustomEventName('');
-                  }
-                }}
-              >
-                <option value="">Select an event type...</option>
-                {eventOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
-                ))}
-              </select>
-              
-              {eventName === 'Custom Event' && (
-                <input
-                  type="text"
-                  placeholder="Enter your custom event name"
-                  value={customEventName}
-                  onChange={(e) => setCustomEventName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  autoFocus
-                />
+            {/* Event Type Section */}
+            <div className="mb-8">
+              <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 block">
+                Event Type
+              </label>
+              <div className="space-y-4">
+                <select 
+                  className="w-full bg-white/10 dark:bg-gray-700/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 rounded-xl px-6 py-4 text-white dark:text-gray-200 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:bg-white/15 dark:hover:bg-gray-700/70 transition-all duration-300 hover:scale-[1.02]"
+                  value={eventType}
+                  onChange={(e) => {
+                    setEventType(e.target.value);
+                    if (e.target.value !== 'Custom Event') {
+                      setCustomEventName('');
+                    }
+                  }}
+                >
+                  <option value="" className="bg-gray-800 dark:bg-gray-900 text-white">Select an event type...</option>
+                  {eventOptions.map((option) => (
+                    <option key={option} value={option} className="bg-gray-800 dark:bg-gray-900 text-white">{option}</option>
+                  ))}
+                </select>
+                
+                {eventType === 'Custom Event' && (
+                  <input
+                    type="text"
+                    placeholder="Enter your custom event name"
+                    value={customEventName}
+                    onChange={(e) => setCustomEventName(e.target.value)}
+                    className="w-full bg-white/10 dark:bg-gray-700/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 rounded-xl px-6 py-4 text-white dark:text-gray-200 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:bg-white/15 dark:hover:bg-gray-700/70 transition-all duration-300 hover:scale-[1.02] placeholder-gray-400 dark:placeholder-gray-500"
+                    autoFocus
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmitRating}
+              disabled={isSubmitting || rating === 0}
+              className={`group relative w-full py-4 px-6 rounded-xl font-inter font-semibold transition-all duration-300 flex items-center justify-center space-x-2 overflow-hidden ${
+                isSubmitting || rating === 0
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-[1.02] hover:shadow-lg'
+              }`}
+            >
+              {!(isSubmitting || rating === 0) && (
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               )}
-            </div>
-          </div>
+              <div className="relative flex items-center gap-2">
+                <Send className={`w-6 h-6 ${!(isSubmitting || rating === 0) ? 'group-hover:rotate-12' : ''} transition-transform duration-300`} />
+                <span>
+                  {isSubmitting ? 'Submitting...' : 'Submit Rating'}
+                </span>
+              </div>
+            </button>
 
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmitRating}
-            disabled={isSubmitting || rating === 0}
-            className={`w-full py-3 px-6 rounded-lg font-inter font-medium transition-colors duration-200 flex items-center justify-center space-x-2 ${
-              isSubmitting || rating === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
-          >
-            <Send className="w-5 h-5" />
-            <span>
-              {isSubmitting ? 'Submitting...' : 'Submit Rating'}
-            </span>
-          </button>
-
-          {/* Message Display */}
-          {message && (
-            <div className={`mt-6 p-4 rounded-lg flex items-center space-x-2 ${
-              message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' :
-              message.type === 'error' ? 'bg-red-50 border border-red-200 text-red-700' :
-              'bg-blue-50 border border-blue-200 text-blue-700'
-            }`}>
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <span className="font-inter">{message.text}</span>
-            </div>
-          )}
-
-          {/* Info Section */}
-          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="font-inter font-medium text-blue-900 mb-2">How it works</h3>
-            <ul className="space-y-1 text-sm text-blue-700">
-              <li>• Your rating is stored securely in your browser</li>
-              <li>• All submissions are completely anonymous</li>
-              <li>• Data persists between sessions</li>
-              <li>• View analytics on the Analytics page</li>
-            </ul>
+            {/* Message Display */}
+            {message && (
+              <div className={`mt-6 p-4 rounded-xl flex items-center space-x-3 backdrop-blur-lg border transition-all duration-300 hover:scale-[1.02] ${
+                message.type === 'success' ? 'bg-green-500/10 border-green-500/30 text-green-400' :
+                message.type === 'error' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
+                'bg-blue-500/10 border-blue-500/30 text-blue-400'
+              }`}>
+                <AlertCircle className="w-6 h-6 flex-shrink-0" />
+                <span className="font-inter font-medium">{message.text}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Star, BarChart3, Info, Users, Settings } from 'lucide-react';
+import { Shield, Star, BarChart3, Info, Users, Settings, Menu, X } from 'lucide-react';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -16,15 +17,22 @@ const Navigation: React.FC = () => {
   ];
   
   return (
-    <nav className="border-b border-gray-200 bg-white">
+    <nav className="border-b border-white/10 bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link 
             to="/" 
-            className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
+            className="group flex items-center space-x-3 text-white hover:text-blue-400 transition-all duration-300"
           >
-            <Shield className="w-8 h-8" />
-            <span className="font-inter font-bold text-xl">Trust-O-Meter</span>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <span className="font-inter font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Trust-O-Meter
+            </span>
           </Link>
           
           <div className="hidden md:flex space-x-1">
@@ -32,27 +40,60 @@ const Navigation: React.FC = () => {
               <Link 
                 key={path}
                 to={path} 
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                className={`group relative flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300 overflow-hidden ${
                   isActive(path) 
-                    ? 'bg-blue-50 text-blue-600' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-blue-500/20 to-purple-600/20 text-blue-400 border border-blue-500/30' 
+                    : 'text-gray-300 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span className="font-inter font-medium">{label}</span>
+                {isActive(path) && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-600/10 rounded-xl"></div>
+                )}
+                <div className="relative flex items-center space-x-2">
+                  <Icon className={`w-4 h-4 transition-transform duration-300 ${isActive(path) ? 'scale-110' : 'group-hover:scale-110'}`} />
+                  <span className="font-inter font-medium">{label}</span>
+                </div>
               </Link>
             ))}
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-50">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-white/10">
+            <div className="space-y-2">
+              {navItems.map(({ path, label, icon: Icon }) => (
+                <Link 
+                  key={path}
+                  to={path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                    isActive(path) 
+                      ? 'bg-gradient-to-r from-blue-500/20 to-purple-600/20 text-blue-400 border border-blue-500/30' 
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-inter font-medium">{label}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
