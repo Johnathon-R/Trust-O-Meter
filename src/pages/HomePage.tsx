@@ -157,10 +157,6 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Featured Ratings Cards */}
-      <div className='text-center'>
-        <h2 className="text-4xl font-bold mb-4 py-20 bg-charcoal text-white text-center px-6">Featured Ratings</h2>
-      </div>
       <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         {getRatings().map(r => (
           <div className="group relative flex-col">
@@ -191,17 +187,6 @@ const HomePage: React.FC = () => {
           </div>
         ))}
       </div>
-      
-
-      {/* Call to Action Section */}
-      <section className="py-20 bg-charcoal text-white text-center px-6">
-        <h2 className="text-4xl font-bold mb-4">Start Building Trust</h2>
-        <p className="text-lg mb-8">Rate your experiences—help everyone make smarter choices.</p>
-        <Button className="bg-electric-blue text-white text-lg px-8 py-4 rounded-xl hover:bg-indigo-700">
-          Get Started
-        </Button>
-      </section>
-
       
     </div>
   );

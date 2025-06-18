@@ -128,24 +128,26 @@ const RatingPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
           <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
             
-            {/* Rating Section */}
-            <div className="mb-8">
-              <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
-                <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-                Your Rating
-              </label>
-              <div className="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300">
+          {/* Rating Section */}
+          <div className="mb-8">
+            <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
+              <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+              Your Rating
+            </label>
+            <div className="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300">
+              <div className="flex justify-center scale-150">
                 <StarRating value={rating} onChange={setRating} />
-                <p className="font-inter text-gray-300 dark:text-gray-400 mt-4 text-center text-lg">
-                  {rating === 0 && 'Select a rating'}
-                  {rating > 0 && rating <= 1 && '⭐ Poor experience'}
-                  {rating > 1 && rating <= 2 && '⭐⭐ Below average'}
-                  {rating > 2 && rating <= 3 && '⭐⭐⭐ Average experience'}
-                  {rating > 3 && rating <= 4 && '⭐⭐⭐⭐ Good experience'}
-                  {rating > 4 && '⭐⭐⭐⭐⭐ Excellent experience'}
-                </p>
               </div>
+              <p className="font-inter text-gray-300 dark:text-gray-400 mt-4 text-center text-lg">
+                {rating === 0 && 'Select a rating'}
+                {rating > 0 && rating <= 1 && '⭐ Poor experience'}
+                {rating > 1 && rating <= 2 && '⭐⭐ Below average'}
+                {rating > 2 && rating <= 3 && '⭐⭐⭐ Average experience'}
+                {rating > 3 && rating <= 4 && '⭐⭐⭐⭐ Good experience'}
+                {rating > 4 && '⭐⭐⭐⭐⭐ Excellent experience'}
+              </p>
             </div>
+          </div>
 
             {/* Event Type Section */}
             <div className="mb-8">
