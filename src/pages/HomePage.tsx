@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, BarChart3, Shield, ArrowRight, Sparkles, Zap } from 'lucide-react';
-
-import { Button } from '../components/ui/Button';
-import { Card, CardContent } from '../components/ui/Card';
-
-import { getRatings } from '../utils/storage';
-import { arrayEqual } from 'algosdk/dist/types/utils/utils';
+import { getRatingsData } from '../backend/functionality';
+import { RatingData } from '../utils/customTypes';
 
 const HomePage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [ratings, setRatings] = useState<RatingData[]>([]);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  useEffect(() => {
+    const fetchRatings = async () => {
+      const data = await getRatingsData();
+      setRatings(data);
+    };
+
+    fetchRatings();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black relative overflow-hidden transition-all duration-500">
@@ -55,17 +62,17 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             <h1 className="font-inter font-bold text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-6 animate-gradient-x">
               Trust-O-Meter
             </h1>
-            
+
             <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <p className="font-inter text-2xl text-gray-300 dark:text-gray-400 mb-4 max-w-3xl mx-auto leading-relaxed">
-                Rate events with <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-semibold">transparent</span>, 
+                Rate events with <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-semibold">transparent</span>,
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-semibold"> immutable</span> feedback powered by Algorand
               </p>
-              
+
               <p className="font-inter text-lg text-gray-400 dark:text-gray-500 max-w-xl mx-auto flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5 text-yellow-400" />
                 Simple, secure, and completely anonymous rating system
@@ -86,7 +93,7 @@ const HomePage: React.FC = () => {
                 <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">Submit ratings quickly and anonymously with verification</p>
               </div>
             </div>
-            
+
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
               <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
@@ -97,7 +104,7 @@ const HomePage: React.FC = () => {
                 <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">Permanently recorded on Algorand for complete transparency</p>
               </div>
             </div>
-            
+
             <div className="group relative">
               <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-orange-500 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
               <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
@@ -112,7 +119,7 @@ const HomePage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className={`flex flex-col sm:flex-row gap-6 justify-center items-center transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <Link 
+            <Link
               to="/rate"
               className="group relative px-10 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-inter font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 min-w-[200px] overflow-hidden"
             >
@@ -123,8 +130,8 @@ const HomePage: React.FC = () => {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </div>
             </Link>
-            
-            <Link 
+
+            <Link
               to="/feedback"
               className="group relative px-10 py-4 bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 text-white rounded-xl font-inter font-semibold hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 min-w-[200px] overflow-hidden"
             >
@@ -153,12 +160,11 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <br></br><br></br>
-
         </div>
       </div>
 
       <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        {getRatings().map(r => (
+        {ratings.map(r => (
           <div className="group relative flex-col">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
             <div key={r.id} className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
@@ -170,14 +176,13 @@ const HomePage: React.FC = () => {
                 {[...Array(5)].map((_, i) => {
                   const fill = Math.min(Math.max(r.rating - i, 0), 1) * 100;
                   return (
-                    <div key={i} className= "relative w-6 h-6">
-                      
+                    <div key={i} className="relative w-6 h-6">
 
                       {/* Filled star (foreground mask) */}
-                      <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400" 
+                      <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
                         style={{ width: `${fill}%` }}
                       >
-                        <Star className={`w-6 h-6 fill-yellow-400`}/>
+                        <Star className={`w-6 h-6 fill-yellow-400`} />
                       </div>
                     </div>
                   );
@@ -187,7 +192,6 @@ const HomePage: React.FC = () => {
           </div>
         ))}
       </div>
-      
     </div>
   );
 };

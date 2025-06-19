@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } from 'lucide-react';
-import StarRating from './StarRating';
-import { getRatingsData } from '../utils/algorand';
-import RatingHistogram from '../hooks/histogram';
+import StarRating from '../components/StarRating';
+import RatingHistogram from '../components/histogram';
+import { getRatingsData } from '../backend/functionality';
 
 interface RatingData {
   rating: number;
@@ -55,7 +55,7 @@ const AnalyticsPage: React.FC = () => {
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'Just now';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
@@ -101,7 +101,7 @@ const AnalyticsPage: React.FC = () => {
                 {stats.averageRating.toFixed(1)}
               </h3>
               <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">Average Rating</p>
-              <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => {}} readonly size="sm" />
+              <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => { }} readonly size="sm" />
             </div>
           </div>
 
@@ -138,42 +138,6 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Rating Distribution */} {/*}
-        <div className={`group relative mb-8 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 dark:from-blue-600/20 dark:to-purple-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-            <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-blue-400 dark:text-blue-300" />
-              Rating Distribution
-            </h2>
-            <div className="space-y-4">
-              {[5, 4, 3, 2, 1].map((bin, i) => {
-                const count = stats.ratingDistribution[stars - 1];
-                const percentage = (count / stats.totalRatings) * 100;
-                
-                return (
-                  <div key={stars} className="flex items-center space-x-4 group/bar hover:scale-105 transition-transform duration-300">
-                    <div className="flex items-center space-x-2 w-16">
-                      <span className="font-inter text-white dark:text-gray-100 font-semibold">{stars}</span>
-                      <Star className="w-4 h-4 text-yellow-400 dark:text-yellow-300 fill-yellow-400 dark:fill-yellow-300" />
-                    </div>
-                    <div className="flex-1 bg-white/10 dark:bg-gray-700/50 rounded-full h-4 overflow-hidden backdrop-blur-lg">
-                      <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 transition-all duration-1000 group-hover/bar:from-blue-400 group-hover/bar:to-purple-500 dark:group-hover/bar:from-blue-500 dark:group-hover/bar:to-purple-600"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="w-16 text-right">
-                      <span className="font-inter text-gray-300 dark:text-gray-400 font-semibold">{count}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        */}
-
         <div>
           <RatingHistogram />
         </div>
@@ -196,16 +160,16 @@ const AnalyticsPage: React.FC = () => {
                 <span className="font-inter font-medium">Refresh</span>
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {stats.recentRatings.map((rating, index) => (
-                <div 
+                <div
                   key={index}
                   className="group/item flex items-center justify-between p-4 bg-white/5 dark:bg-gray-700/40 rounded-xl border border-white/10 dark:border-gray-600/50 hover:bg-white/10 dark:hover:bg-gray-600/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="group-hover/item:scale-110 transition-transform duration-300">
-                      <StarRating rating={rating.rating} onRatingChange={() => {}} readonly size="sm" />
+                      <StarRating rating={rating.rating} onRatingChange={() => { }} readonly size="sm" />
                     </div>
                     <div>
                       <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>

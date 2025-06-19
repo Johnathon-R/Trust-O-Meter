@@ -1,24 +1,34 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Star } from 'lucide-react'; // Assumes lucide-react is installed
-import { getRatings } from '../utils/storage';
+import { getRatingsData } from '../backend/functionality';
+import { RatingData } from '../utils/customTypes';
 
 
 
 
-{/* Horizontal bar version */}
+{/* Horizontal bar version */ }
 export default function RatingHistogram() {
   const [binCount, setBinCount] = useState(5);
+  const [histogramData, setHistogramData] = useState<number[]>([]);
+  const [ratings, setRatings] = useState<RatingData[]>([]);
 
-  const histogramData = useMemo(() => {
-    const bins = new Array(binCount).fill(0);
-    const binSize = 5 / binCount;
+  useEffect(() => {
+    const loadHistogram = async () => {
+      const ratings: RatingData[] = await getRatingsData();
+      setRatings(ratings);
 
-    getRatings().forEach(r => {
-      const index = Math.min(Math.floor(r.rating / binSize), binCount - 1);
-      bins[index]++;
-    });
+      const bins = new Array(binCount).fill(0);
+      const binSize = 5/binCount;
 
-    return bins;
+      ratings.forEach(r => {
+        const index = Math.min(Math.floor(r.rating / binSize), binCount - 1);
+        bins[index]++;
+      });
+
+      setHistogramData(bins);
+    }
+
+    loadHistogram();
   }, [binCount]);
 
   const maxCount = Math.max(...histogramData);
@@ -49,7 +59,7 @@ export default function RatingHistogram() {
         {histogramData.map((count, i) => {
           const start = (i * binSize).toFixed(1);
           const end = ((i + 1) * binSize).toFixed(1);
-          const percentage = (count / getRatings().length) * 100;
+          const percentage = (count / ratings.length) * 100;
           const widthPercent = (count / maxCount) * 100;
 
           return (
@@ -63,7 +73,7 @@ export default function RatingHistogram() {
 
               {/* Bar */}
               <div className="flex-1 bg-white/10 dark:bg-gray-700/50 rounded-full h-4 overflow-hidden backdrop-blur-lg">
-                <div 
+                <div
                   className="h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 transition-all duration-700"
                   style={{ width: `${widthPercent}%` }}
                 ></div>

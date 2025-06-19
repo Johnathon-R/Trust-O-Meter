@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Shield, Star, BarChart3, Users, Lock, Zap, Sparkles } from 'lucide-react';
+import { Shield, BarChart3, Lock, Zap, Sparkles } from 'lucide-react';
 
 const AboutPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);

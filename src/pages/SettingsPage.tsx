@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Bell, Shield, Moon, Sun, Save, Sparkles, Download, Trash2 } from 'lucide-react';
-import { exportRatings, clearAllRatings, getRatings } from '../utils/storage';
+import { exportRatings, clearAllRatings, getRatingsData } from '../backend/functionality';
 
 const SettingsPage: React.FC = () => {
   const [notifications, setNotifications] = useState(true);
@@ -14,7 +14,7 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     setIsVisible(true);
-    
+
     // Load settings from localStorage on component mount
     const savedSettings = localStorage.getItem('trust-o-meter-settings');
     if (savedSettings) {
@@ -42,17 +42,17 @@ const SettingsPage: React.FC = () => {
       showAnalytics
     };
     localStorage.setItem('trust-o-meter-settings', JSON.stringify(settings));
-    
+
     // Apply the pending dark mode change
     if (pendingDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
+
     // Update the actual darkMode state to match the pending state
     setDarkMode(pendingDarkMode);
-    
+
     setSaveMessage('Settings saved successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
@@ -85,27 +85,24 @@ const SettingsPage: React.FC = () => {
     console.log('Analytics visibility toggled:', !showAnalytics);
   };
 
-  const totalRatings = getRatings().length;
+  const totalRatings = getRatingsData().length;
 
   const ToggleSwitch = ({ enabled, onChange }: { enabled: boolean; onChange: () => void }) => (
     <button
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${
-        enabled ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gray-600'
-      } hover:scale-110`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${enabled ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gray-600'
+        } hover:scale-110`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 ${
-          enabled ? 'translate-x-6 shadow-lg' : 'translate-x-1'
-        }`}
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-300 ${enabled ? 'translate-x-6 shadow-lg' : 'translate-x-1'
+          }`}
       />
     </button>
   );
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-all duration-500 ${
-      darkMode ? 'dark' : ''
-    }`}>
+    <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-all duration-500 ${darkMode ? 'dark' : ''
+      }`}>
       {/* Animated background */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
@@ -168,7 +165,7 @@ const SettingsPage: React.FC = () => {
                     <h3 className="font-inter font-medium text-white dark:text-gray-200">Language</h3>
                     <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Choose your preferred language</p>
                   </div>
-                  <select 
+                  <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
                     className="bg-white/10 dark:bg-gray-700/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 rounded-xl px-4 py-2 text-white dark:text-gray-200 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white/15 dark:hover:bg-gray-700/70 transition-all duration-300"
@@ -245,15 +242,15 @@ const SettingsPage: React.FC = () => {
                     You have {totalRatings} rating{totalRatings !== 1 ? 's' : ''} stored locally
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <button 
+                    <button
                       onClick={handleExportData}
                       className="group px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-inter font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
                     >
                       <Download className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
                       <span>Export Data</span>
                     </button>
-                    
-                    <button 
+
+                    <button
                       onClick={() => setShowClearConfirm(true)}
                       disabled={totalRatings === 0}
                       className="group px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl font-inter font-medium hover:from-red-700 hover:to-pink-700 transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
