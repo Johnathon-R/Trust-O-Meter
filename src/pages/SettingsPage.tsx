@@ -1,15 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Bell, Shield, Moon, Sun, Sparkles, Download, Trash2 } from 'lucide-react';
-import { exportRatings, clearAllRatings, getRatings } from '../utils/storage';
+import { exportRatings, clearAllRatings, getRatings, updateAnalyticsPreference, getSettings } from '../utils/storage';
+import { t, getCurrentLanguage, getLanguageDisplayNames, type Language } from '../utils/i18n.ts';
+
+// Persistent Floating Particles Component
+const FloatingParticles = React.memo(() => {
+  // Generate particles with stable keys and positions
+  const particles = Array.from({ length: 20 }, (_, i) => {
+    const left = `${Math.random() * 100}%`;
+    const top = `${Math.random() * 100}%`;
+    const delay = `${Math.random() * 3}s`;
+    const duration = `${3 + Math.random() * 4}s`;
+    
+    return (
+      <div
+        key={`particle-${i}`}
+        className="absolute animate-float"
+        style={{
+          left,
+          top,
+          animationDelay: delay,
+          animationDuration: duration
+        }}
+      >
+        <div className="w-2 h-2 bg-white rounded-full opacity-30"></div>
+      </div>
+    );
+  });
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {particles}
+    </div>
+  );
+});
 
 const SettingsPage: React.FC = () => {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState<Language>('en');
   const [showAnalytics, setShowAnalytics] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
 
   // Save settings to localStorage and apply changes
   const saveSettings = () => {
@@ -27,28 +59,21 @@ const SettingsPage: React.FC = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
-    // Show save confirmation
-    setSaveMessage('Settings saved!');
-    setTimeout(() => setSaveMessage(''), 2000);
   };
 
   // Load settings on component mount
   useEffect(() => {
     setIsVisible(true);
     
-    const savedSettings = localStorage.getItem('trust-o-meter-settings');
-    if (savedSettings) {
-      const settings = JSON.parse(savedSettings);
-      setNotifications(settings.notifications ?? true);
-      setDarkMode(settings.darkMode ?? false);
-      setLanguage(settings.language ?? 'en');
-      setShowAnalytics(settings.showAnalytics ?? true);
-    }
+    const savedSettings = getSettings();
+    setNotifications(savedSettings.notifications ?? true);
+    setDarkMode(savedSettings.darkMode ?? false);
+    setLanguage(savedSettings.language ?? 'en');
+    setShowAnalytics(savedSettings.showAnalytics ?? true);
 
     // Check if dark mode is already enabled
     const isDarkMode = document.documentElement.classList.contains('dark');
-    if (isDarkMode !== darkMode) {
+    if (isDarkMode !== (savedSettings.darkMode ?? false)) {
       setDarkMode(isDarkMode);
     }
   }, []);
@@ -79,18 +104,28 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleToggleAnalytics = () => {
-    setShowAnalytics(!showAnalytics);
-    console.log('Analytics visibility toggled:', !showAnalytics);
+    const newValue = !showAnalytics;
+    setShowAnalytics(newValue);
+    updateAnalyticsPreference(newValue);
   };
 
   // Function to change language
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLanguage = e.target.value;
+    const newLanguage = e.target.value as Language;
     setLanguage(newLanguage);
-    // You can add additional language-specific logic here if needed
+    
+    // Save current dark mode state before reload
+    const currentDarkMode = document.documentElement.classList.contains('dark');
+    localStorage.setItem('trust-o-meter-dark-mode', JSON.stringify(currentDarkMode));
+    
+    // Force a page reload to apply the new language
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const totalRatings = getRatings().length;
+  const languageDisplayNames = getLanguageDisplayNames();
 
   const ToggleSwitch = ({ enabled, onChange }: { enabled: boolean; onChange: () => void }) => (
     <button
@@ -111,29 +146,15 @@ const SettingsPage: React.FC = () => {
     <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-all duration-500 ${
       darkMode ? 'dark' : ''
     }`}>
-      {/* Background elements remain the same */}
+      {/* Background elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 4}s`
-            }}
-          >
-            <div className="w-2 h-2 bg-white rounded-full opacity-30"></div>
-          </div>
-        ))}
-      </div>
+      {/* Persistent floating particles */}
+      <FloatingParticles />
 
       <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header */}
@@ -147,10 +168,10 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
           <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
-            Settings
+            {t('settings.title')}
           </h1>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
-            Customize your Trust-O-Meter experience
+            {t('settings.subtitle')}
           </p>
         </div>
 
@@ -163,24 +184,23 @@ const SettingsPage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                   <Settings className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">General</h2>
+                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t('settings.general.title')}</h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between group/item hover:scale-105 transition-transform duration-300">
                   <div>
-                    <h3 className="font-inter font-medium text-white dark:text-gray-200">Language</h3>
-                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Choose your preferred language</p>
+                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('settings.general.language')}</h3>
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('settings.general.languageDescription')}</p>
                   </div>
                   <select 
                     value={language}
                     onChange={handleLanguageChange}
                     className="bg-white/10 dark:bg-gray-700/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 rounded-xl px-4 py-2 text-white dark:text-gray-200 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 hover:bg-white/15 dark:hover:bg-gray-700/70 transition-all duration-300"
                   >
-                    <option value="en" className="bg-gray-800 dark:bg-gray-900">English</option>
-                    <option value="es" className="bg-gray-800 dark:bg-gray-900">Español</option>
-                    <option value="fr" className="bg-gray-800 dark:bg-gray-900">Français</option>
-                    <option value="de" className="bg-gray-800 dark:bg-gray-900">Deutsch</option>
+                    {Object.entries(languageDisplayNames).map(([code, name]) => (
+                      <option key={code} value={code} className="bg-gray-800 dark:bg-gray-900">{name}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -190,8 +210,8 @@ const SettingsPage: React.FC = () => {
                       {darkMode ? <Moon className="w-4 h-4 text-white" /> : <Sun className="w-4 h-4 text-white" />}
                     </div>
                     <div>
-                      <h3 className="font-inter font-medium text-white dark:text-gray-200">Dark Mode</h3>
-                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Switch to dark theme</p>
+                      <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('settings.general.darkMode')}</h3>
+                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('settings.general.darkModeDescription')}</p>
                     </div>
                   </div>
                   <ToggleSwitch enabled={darkMode} onChange={() => setDarkMode(!darkMode)} />
@@ -208,14 +228,14 @@ const SettingsPage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                   <Bell className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">Notifications</h2>
+                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t('settings.notifications.title')}</h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between group/item hover:scale-105 transition-transform duration-300">
                   <div>
-                    <h3 className="font-inter font-medium text-white dark:text-gray-200">Push Notifications</h3>
-                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Receive notifications about rating updates</p>
+                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('settings.notifications.push')}</h3>
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('settings.notifications.pushDescription')}</p>
                   </div>
                   <ToggleSwitch enabled={notifications} onChange={() => setNotifications(!notifications)} />
                 </div>
@@ -231,22 +251,27 @@ const SettingsPage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">Privacy & Data</h2>
+                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t('settings.privacy.title')}</h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between group/item hover:scale-105 transition-transform duration-300">
                   <div>
-                    <h3 className="font-inter font-medium text-white dark:text-gray-200">Show in Analytics</h3>
-                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Include your ratings in public analytics</p>
+                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('settings.privacy.showAnalytics')}</h3>
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">
+                      {showAnalytics 
+                        ? t('settings.privacy.showAnalyticsIncluded')
+                        : t('settings.privacy.showAnalyticsExcluded')
+                      }
+                    </p>
                   </div>
                   <ToggleSwitch enabled={showAnalytics} onChange={handleToggleAnalytics} />
                 </div>
 
                 <div className="border-t border-white/20 dark:border-gray-700/50 pt-6">
-                  <h3 className="font-inter font-medium text-white dark:text-gray-200 mb-3">Data Export</h3>
+                  <h3 className="font-inter font-medium text-white dark:text-gray-200 mb-3">{t('settings.privacy.dataExport')}</h3>
                   <p className="font-inter text-gray-400 dark:text-gray-500 text-sm mb-4">
-                    You have {totalRatings} rating{totalRatings !== 1 ? 's' : ''} stored locally
+                    {totalRatings} {t('settings.privacy.ratingsStored')}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button 
@@ -254,7 +279,7 @@ const SettingsPage: React.FC = () => {
                       className="group px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-inter font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
                     >
                       <Download className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                      <span>Export Data</span>
+                      <span>{t('settings.privacy.exportData')}</span>
                     </button>
                     
                     <button 
@@ -263,22 +288,13 @@ const SettingsPage: React.FC = () => {
                       className="group px-4 py-2 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-xl font-inter font-medium hover:from-red-700 hover:to-pink-700 transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                     >
                       <Trash2 className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                      <span>Clear All Data</span>
+                      <span>{t('settings.privacy.clearAllData')}</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Save Success Message */}
-          {saveMessage && (
-            <div className="flex justify-center transition-all duration-300">
-              <div className="bg-green-500/10 border border-green-500/30 text-green-400 px-6 py-3 rounded-xl font-inter font-medium">
-                {saveMessage}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Clear Confirmation Modal */}
@@ -286,23 +302,23 @@ const SettingsPage: React.FC = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full">
               <h3 className="font-inter font-bold text-xl text-gray-900 dark:text-gray-100 mb-4">
-                Clear All Data?
+                {t('settings.messages.clearConfirmTitle')}
               </h3>
               <p className="font-inter text-gray-600 dark:text-gray-300 mb-6">
-                This action cannot be undone. All your ratings ({totalRatings} total) will be permanently deleted from local storage.
+                {t('settings.messages.clearConfirmDescription')}
               </p>
               <div className="flex space-x-4">
                 <button
                   onClick={() => setShowClearConfirm(false)}
                   className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-inter font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                 >
-                  Cancel
+                  {t('settings.messages.cancel')}
                 </button>
                 <button
                   onClick={handleClearAllData}
                   className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-inter font-medium hover:bg-red-700 transition-colors duration-200"
                 >
-                  Clear All
+                  {t('settings.messages.clearAll')}
                 </button>
               </div>
             </div>

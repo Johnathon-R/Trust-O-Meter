@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Shield, Star, BarChart3, Info, Users, Settings, Menu, X } from 'lucide-react';
+import { t } from '../utils/i18n';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -9,11 +10,11 @@ const Navigation: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { path: '/rate', label: 'Rate', icon: Star },
-    { path: '/feedback', label: 'Analytics', icon: BarChart3 },
-    { path: '/about', label: 'About', icon: Info },
-    { path: '/community', label: 'Community', icon: Users },
-    { path: '/settings', label: 'Settings', icon: Settings },
+    { path: '/rate', label: t('nav.rate'), icon: Star },
+    { path: '/feedback', label: t('nav.analytics'), icon: BarChart3 },
+    { path: '/about', label: t('nav.about'), icon: Info },
+    { path: '/community', label: t('nav.community'), icon: Users },
+    { path: '/settings', label: t('nav.settings'), icon: Settings },
   ];
 
   return (

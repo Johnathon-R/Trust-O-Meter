@@ -33,6 +33,9 @@ export const submitRating = async (
     // const { txId } = await algodClient.sendRawTransaction(signedTxn).do();
     // console.log("Submitted with txId:", txId);
 
+    // Save the rating locally after successful blockchain submission
+    saveRating(rating, eventName);
+
     return true;
   } catch (error) {
     console.error('Rating submission error:', error);

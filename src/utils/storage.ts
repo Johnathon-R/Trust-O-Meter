@@ -1,10 +1,10 @@
-
 // Local storage utilities for persisting ratings data
 export type RatingData = {
   id: string;
   rating: number;
   eventName: string;
   timestamp: Date;
+  includeInAnalytics?: boolean; // Add this field to track analytics preference
 }
 
 export interface RatingStats {
@@ -15,16 +15,33 @@ export interface RatingStats {
 }
 
 const STORAGE_KEY = 'trust-o-meter-ratings';
+const SETTINGS_KEY = 'trust-o-meter-settings';
+
+/**
+ * Get current settings from localStorage
+ */
+export const getSettings = () => {
+  try {
+    const settings = localStorage.getItem(SETTINGS_KEY);
+    return settings ? JSON.parse(settings) : { showAnalytics: true };
+  } catch (error) {
+    console.error('Error loading settings:', error);
+    return { showAnalytics: true };
+  }
+};
 
 /**
  * Save a new rating to local storage
  */
 export const saveRating = (rating: number, eventName: string): RatingData => {
+  const settings = getSettings();
+  
   const newRating: RatingData = {
     id: generateId(),
     rating,
     eventName,
-    timestamp: new Date()
+    timestamp: new Date(),
+    includeInAnalytics: settings.showAnalytics ?? true
   };
 
   const existingRatings = getRatings();
@@ -43,10 +60,11 @@ export const getRatings = (): RatingData[] => {
     if (!stored) return [];
     
     const ratings = JSON.parse(stored);
-    // Convert timestamp strings back to Date objects
+    // Convert timestamp strings back to Date objects and ensure includeInAnalytics exists
     return ratings.map((rating: any) => ({
       ...rating,
-      timestamp: new Date(rating.timestamp)
+      timestamp: new Date(rating.timestamp),
+      includeInAnalytics: rating.includeInAnalytics ?? true // Default to true for existing ratings
     }));
   } catch (error) {
     console.error('Error loading ratings from storage:', error);
@@ -55,10 +73,31 @@ export const getRatings = (): RatingData[] => {
 };
 
 /**
- * Calculate statistics from stored ratings
+ * Get ratings that should be included in analytics
+ */
+export const getAnalyticsRatings = (): RatingData[] => {
+  const allRatings = getRatings();
+  return allRatings.filter(rating => rating.includeInAnalytics !== false);
+};
+
+/**
+ * Update all existing ratings' analytics preference
+ */
+export const updateAnalyticsPreference = (includeInAnalytics: boolean): void => {
+  const ratings = getRatings();
+  const updatedRatings = ratings.map(rating => ({
+    ...rating,
+    includeInAnalytics
+  }));
+  
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedRatings));
+};
+
+/**
+ * Calculate statistics from stored ratings (respecting analytics preference)
  */
 export const calculateStats = (): RatingStats => {
-  const ratings = getRatings();
+  const ratings = getAnalyticsRatings(); // Only use ratings that should be included in analytics
   
   if (ratings.length === 0) {
     return {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } from 'lucide-react';
 import StarRating from './StarRating';
 import { getRatingsData } from '../utils/algorand';
+import { t, formatTimeAgo } from '../utils/i18n';
 import RatingHistogram from '../hooks/histogram';
 
 // Add the FloatingDotsBackground component at the top
@@ -74,16 +75,6 @@ const AnalyticsPage: React.FC = () => {
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-colors duration-300">
       {/* Animated background */}
@@ -101,12 +92,12 @@ const AnalyticsPage: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <BarChart3 className="w-8 h-8 text-blue-400 dark:text-blue-300 mr-2" />
             <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 dark:from-blue-300 dark:to-purple-300">
-              Rating Analytics
+              {t('analytics.title')}
             </h1>
             <Sparkles className="w-8 h-8 text-yellow-400 dark:text-yellow-300 ml-2" />
           </div>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
-            Transparent feedback powered by blockchain technology
+            {t('analytics.subtitle')}
           </p>
         </div>
 
@@ -124,7 +115,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.averageRating.toFixed(1)}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">Average Rating</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t('analytics.averageRating')}</p>
               <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => {}} readonly size="sm" />
             </div>
           </div>
@@ -141,7 +132,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.totalRatings.toLocaleString()}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400">Total Ratings</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400">{t('analytics.totalRatings')}</p>
             </div>
           </div>
 
@@ -157,46 +148,10 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.recentRatings.length}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400">Recent Reviews</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400">{t('analytics.recentReviews')}</p>
             </div>
           </div>
         </div>
-
-        {/* Rating Distribution */} {/*}
-        <div className={`group relative mb-8 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-600/20 dark:from-blue-600/20 dark:to-purple-700/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-          <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-700/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
-            <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-blue-400 dark:text-blue-300" />
-              Rating Distribution
-            </h2>
-            <div className="space-y-4">
-              {[5, 4, 3, 2, 1].map((bin, i) => {
-                const count = stats.ratingDistribution[stars - 1];
-                const percentage = (count / stats.totalRatings) * 100;
-                
-                return (
-                  <div key={stars} className="flex items-center space-x-4 group/bar hover:scale-105 transition-transform duration-300">
-                    <div className="flex items-center space-x-2 w-16">
-                      <span className="font-inter text-white dark:text-gray-100 font-semibold">{stars}</span>
-                      <Star className="w-4 h-4 text-yellow-400 dark:text-yellow-300 fill-yellow-400 dark:fill-yellow-300" />
-                    </div>
-                    <div className="flex-1 bg-white/10 dark:bg-gray-700/50 rounded-full h-4 overflow-hidden backdrop-blur-lg">
-                      <div 
-                        className="h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 transition-all duration-1000 group-hover/bar:from-blue-400 group-hover/bar:to-purple-500 dark:group-hover/bar:from-blue-500 dark:group-hover/bar:to-purple-600"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="w-16 text-right">
-                      <span className="font-inter text-gray-300 dark:text-gray-400 font-semibold">{count}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        */}
 
         <div>
           <RatingHistogram />
@@ -209,7 +164,7 @@ const AnalyticsPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-purple-400 dark:text-purple-300" />
-                Recent Ratings
+                {t('analytics.recentRatings')}
               </h2>
               <button
                 onClick={loadRatingsData}
@@ -217,7 +172,7 @@ const AnalyticsPage: React.FC = () => {
                 className="group/btn flex items-center space-x-2 px-4 py-2 bg-white/10 dark:bg-gray-700/50 text-blue-400 dark:text-blue-300 rounded-xl hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all duration-300 disabled:opacity-50 hover:scale-105"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover/btn:rotate-180'} transition-transform duration-300`} />
-                <span className="font-inter font-medium">Refresh</span>
+                <span className="font-inter font-medium">{t('analytics.refresh')}</span>
               </button>
             </div>
             
@@ -233,7 +188,7 @@ const AnalyticsPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>
-                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Anonymous User</p>
+                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('analytics.anonymousUser')}</p>
                     </div>
                   </div>
                   <div className="text-right">
