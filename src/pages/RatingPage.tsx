@@ -53,6 +53,11 @@ const RatingPage: React.FC = () => {
   */}
 
   const handleSubmitRating = async () => {
+    if (isSubmitting) {
+      setMessage({type: "error", text:"Please wait for previous rating to submit."});
+      return;
+    }
+
     if (rating === 0) {
       setMessage({ type: "error", text: "Please select a rating before submitting." });
       return;
@@ -67,6 +72,8 @@ const RatingPage: React.FC = () => {
       city: eventLocation.trim(),
       country: "Get this later",
     }
+
+    setIsSubmitting(true); 
 
     if (!eventLocation.trim()) {
       setMessage({ type: "error", text: "Submitting rating to blockchain..." });

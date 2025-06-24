@@ -47,14 +47,18 @@ export const calculateStats = async (): Promise<RatingStats> => {
  * @brief Get ratings data from local storage
  * @returns 
  */
-export const getRatingsData = async (): Promise<any> => {
+export const getRatingsData = async (): Promise<RatingStats> => {
   try {
     // Return actual stored ratings data
     return calculateStats();
     
   } catch (error) {
     console.error('Error fetching ratings data:', error);
-    return null;
+    return {averageRating: 0,
+      totalRatings: 0,
+      recentRatings: [],
+      ratingDistribution: [],
+    };
   }
 };
 

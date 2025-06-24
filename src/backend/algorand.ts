@@ -1,17 +1,19 @@
 import { Location, RatingData } from "../utils/customTypes";
+import { Buffer } from 'buffer';
 
 import algosdk from "algosdk";
 
-const algodToken = 'L6Q3MUTO4EEEGDERLROLJZHZ2ORMO6QCEJC3I77QN56NO4VEC2YCTBPDVE';
+// Algod server information
+const algodToken = '';
 const algodServer = 'https://testnet-api.algonode.cloud'; // or another provider
 const algodPort = '';
 
 const algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
-const indexerClient = new algosdk.Indexer(algodToken, algodServer, algodPort);
+const indexerClient = new algosdk.Indexer(algodToken, 'https://testnet-idx.algonode.cloud', algodPort);
 
 // Use a predefined sender account (this is a demo keypair — never use real funds)
-const HARD_CODED_PRIVATE_KEY = Uint8Array.from([/* put your private key array here */]);
-const HARD_CODED_ACCOUNT = algosdk.mnemonicToSecretKey(algodToken) /* algosdk.generateAccount() */;
+const MNEMONIC = "govern tumble become ketchup useful enter stem top pole curtain husband parade civil grape move shield drill airport napkin ecology shock fluid stomach absent sort";
+const HARD_CODED_ACCOUNT = algosdk.mnemonicToSecretKey(MNEMONIC);
 
 /**
  * @brief Submitting ratings to algorand blockchain through our token
@@ -22,18 +24,14 @@ const HARD_CODED_ACCOUNT = algosdk.mnemonicToSecretKey(algodToken) /* algosdk.ge
  * @returns 
  */
 export const submitRatingToAlgorand = async (
-  rating: number,
-  eventName: string,
-  location: Location,
-  timestamp=Date(),
-): Promise<boolean> => {
+  rating: number, eventName: string, location: Location, timestamp=Date()): Promise<boolean> => {
 
   try {
     const sender = HARD_CODED_ACCOUNT;
     const params = await algodClient.getTransactionParams().do();
 
     const note = new TextEncoder().encode(JSON.stringify({
-      rating, eventName, location, timestamp,
+      rating, eventName, location, timestamp
     }));
 
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -69,19 +67,31 @@ export const searchRatings = async (): Promise<RatingData[]> => {
     return result.transactions
       .filter(txn => txn.note)
       .map(txn => {
-        const note = new TextDecoder().decode(
-          Uint8Array.from(atob(txn.note), c => c.charCodeAt(0))
-        );
+        try {
+          // Base64 decoding of note (txn.note is a base64 string)
+          const note = new TextDecoder().decode(
+            new Uint8Array(Buffer.from(txn.note, 'base64'))
+          );
+          const parsed = JSON.parse(note);
 
-        const parsed = JSON.parse(note);
+          // Defensive checks
+          if (typeof parsed.rating !== 'number' || typeof parsed.eventName !== 'string' || typeof parsed.timestamp !== 'string') {
+            console.warn("Invalid note structure:", parsed);
+            return null;
+          }
 
-        return {
-          id: txn.id || txn["id"] || "unknown",
-          rating: parsed.rating,
-          eventName: parsed.eventName,
-          timestamp: new Date(parsed.timestamp),
-        } as RatingData;
-      });
+          // Returning Rating data note object
+          return {
+            id: txn.id || txn["id"] || "unknown",
+            rating: parsed.rating,
+            eventName: parsed.eventName,
+            timestamp: new Date(parsed.timestamp),
+          } as RatingData;
+        } catch (innerErr) {
+          console.log("Error retrieving transactions: ", innerErr);
+          null;
+        }
+      }).filter((x): x is RatingData => x !== null);
   } catch (err) {
     console.log("Error retrieving transactions: ", err);
     return [];

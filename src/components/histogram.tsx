@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Star } from 'lucide-react'; // Assumes lucide-react is installed
-import { getRatingsData } from '../backend/functionality';
 import { RatingData } from '../utils/customTypes';
+import { searchRatings } from '../backend/algorand';
 
 
 
@@ -14,7 +14,7 @@ export default function RatingHistogram() {
 
   useEffect(() => {
     const loadHistogram = async () => {
-      const ratings: RatingData[] = await getRatingsData();
+      const ratings: RatingData[] = await searchRatings();
       setRatings(ratings);
 
       const bins = new Array(binCount).fill(0);

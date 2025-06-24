@@ -12,7 +12,7 @@ export type RatingData = {
   timestamp: Date;
 }
 
-export interface RatingStats {
+export type RatingStats = {
   averageRating: number;
   totalRatings: number;
   recentRatings: RatingData[];

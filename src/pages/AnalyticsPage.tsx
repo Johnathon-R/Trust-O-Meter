@@ -3,6 +3,7 @@ import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } fro
 import StarRating from '../components/StarRating';
 import RatingHistogram from '../components/histogram';
 import { getRatingsData } from '../backend/functionality';
+import { q } from 'framer-motion/client';
 
 interface RatingData {
   rating: number;

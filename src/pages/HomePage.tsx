@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, BarChart3, Shield, ArrowRight, Sparkles, Zap } from 'lucide-react';
-import { getRatingsData } from '../backend/functionality';
 import { RatingData } from '../utils/customTypes';
+import { searchRatings } from '../backend/algorand';
 
 const HomePage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchRatings = async () => {
-      const data = await getRatingsData();
+      const data = await searchRatings();
       setRatings(data);
     };
 
