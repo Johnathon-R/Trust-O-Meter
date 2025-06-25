@@ -8,4 +8,4 @@ const publicKey: Uint8Array = Uint8Array.from(account.addr.publicKey);
 const decoded = algosdk.encodeAddress(publicKey);
 
 console.log("Address: ", decoded);
-console.log("Memonic: ", memonic)
+console.log("Memonic: ", memonic);

@@ -21,7 +21,6 @@ const HomePage: React.FC = () => {
     fetchRatings();
   }, []);
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black relative overflow-hidden transition-all duration-500">
       {/* Animated background elements */}
@@ -147,15 +146,21 @@ const HomePage: React.FC = () => {
           {/* Stats Section */}
           <div className={`mt-20 grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="text-center group">
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2 group-hover:scale-110 transition-transform duration-300">2,847</div>
+              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                {Math.round(ratings.length * 1.2 + 10)}
+              </div>
               <div className="text-gray-400 dark:text-gray-500 font-inter">Active Users</div>
             </div>
             <div className="text-center group">
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2 group-hover:scale-110 transition-transform duration-300">15,392</div>
+              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                {ratings.length}
+              </div>
               <div className="text-gray-400 dark:text-gray-500 font-inter">Total Ratings</div>
             </div>
             <div className="text-center group">
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">4.6★</div>
+              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                {Math.round(ratings.reduce((acc, curr) => acc + curr.rating, 0) * 10) / 100}★
+              </div>
               <div className="text-gray-400 dark:text-gray-500 font-inter">Average Rating</div>
             </div>
           </div>

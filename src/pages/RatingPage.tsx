@@ -68,17 +68,17 @@ const RatingPage: React.FC = () => {
       return;
     }
 
+    if (!eventLocation.trim()) {
+      setMessage({ type: "error", text: "Please enter an event Location..." });
+      return;
+    }
+
     const location: Location = {
       city: eventLocation.trim(),
       country: "Get this later",
     }
 
     setIsSubmitting(true); 
-
-    if (!eventLocation.trim()) {
-      setMessage({ type: "error", text: "Submitting rating to blockchain..." });
-      return;
-    }
 
     try {
       const success = await submitRatingToAlgorand(rating, `${eventName.trim()}`, location);

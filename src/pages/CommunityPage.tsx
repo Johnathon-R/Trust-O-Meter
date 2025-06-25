@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Users, MessageCircle, TrendingUp, Award, Calendar, ExternalLink, Sparkles } from 'lucide-react';
+import { searchRatings } from '../backend/algorand';
+import { RatingData } from '../utils/customTypes';
 
 const CommunityPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [ratings, setRatings] = useState<RatingData[]>([]);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
+  useEffect(() => {
+    const fetchRatings = async () => {
+      const data = await searchRatings();
+      setRatings(data);
+    };
+  
+    fetchRatings();
+  }, []);
+
   const communityStats = [
-    { label: 'Active Users', value: '2,847', icon: Users, color: 'blue' },
-    { label: 'Total Ratings', value: '15,392', icon: TrendingUp, color: 'green' },
-    { label: 'Events Rated', value: '1,205', icon: Calendar, color: 'purple' },
-    { label: 'Community Score', value: '4.6/5', icon: Award, color: 'orange' },
+    { label: 'Active Users', value: Math.round(ratings.length * 1.2 + 10), icon: Users, color: 'blue' },
+    { label: 'Total Ratings', value: ratings.length, icon: TrendingUp, color: 'green' },
+    { label: 'Events Rated', value: ratings.length, icon: Calendar, color: 'purple' },
+    { label: 'Community Score', value: Math.round(ratings.reduce((acc, curr) => acc + curr.rating, 0) * 10) / 100, icon: Award, color: 'orange' },
   ];
 
   const recentActivity = [
@@ -223,15 +235,18 @@ const CommunityPage: React.FC = () => {
               Connect with other users, share feedback, and help build a more transparent rating ecosystem.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="group px-6 py-3 bg-white text-blue-600 rounded-xl font-inter font-medium hover:bg-gray-50 transition-all duration-300 flex items-center justify-center space-x-2 hover:scale-105 hover:shadow-lg">
-                <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                <span>Join Discord</span>
-                <ExternalLink className="w-4 h-4" />
-              </button>
-              <button className="group px-6 py-3 bg-blue-600/20 text-white border border-blue-400/30 rounded-xl font-inter font-medium hover:bg-blue-600/30 transition-all duration-300 flex items-center justify-center space-x-2 hover:scale-105 hover:shadow-lg">
-                <Users className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                <span>Follow Updates</span>
-              </button>
+              <a href='https://discord.com' target="_blank">
+                <button className="group px-6 py-3 bg-white text-blue-600 rounded-xl font-inter font-medium hover:bg-gray-50 transition-all duration-300 flex items-center justify-center space-x-2 hover:scale-105 hover:shadow-lg">
+                  <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+                  <span>Join Discord</span>
+                </button>
+              </a>
+              <a target="_blank" href='https://worldslargesthackathon.devpost.com/?ref_feature=challenge&ref_medium=homepage-recommended-hackathons&_gl=1*c2nf51*_gcl_au*MTAxNDY3OTc2NC4xNzQ5NDMxODA2*_ga*MTQ4MjE3MDE1MS4xNzQ5NDMxODA2*_ga_0YHJK3Y10M*czE3NTA4MTAxNTMkbzUkZzEkdDE3NTA4MTAxNTUkajU4JGwwJGgw'>
+                <button className="group px-6 py-3 bg-blue-600/20 text-white border border-blue-400/30 rounded-xl font-inter font-medium hover:bg-blue-600/30 transition-all duration-300 flex items-center justify-center space-x-2 hover:scale-105 hover:shadow-lg">
+                  <Users className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Follow Updates</span>
+                </button>
+              </a>
             </div>
           </div>
         </div>

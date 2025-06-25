@@ -2,8 +2,6 @@ import { RatingData, RatingStats } from "../utils/customTypes";
 import { searchRatings } from "./algorand";
 
 
-const STORAGE_KEY = 'trust-o-meter-ratings';
-
 /**
  * @brief Calculate the statistics for the ratings.
  * @returns 
@@ -60,13 +58,6 @@ export const getRatingsData = async (): Promise<RatingStats> => {
       ratingDistribution: [],
     };
   }
-};
-
-/**
- * Clear all ratings from storage
- */
-export const clearAllRatings = (): void => {
-  localStorage.removeItem(STORAGE_KEY);
 };
 
 /**

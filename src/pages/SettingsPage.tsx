@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Bell, Shield, Moon, Sun, Save, Sparkles, Download, Trash2 } from 'lucide-react';
-import { exportRatings, clearAllRatings, getRatingsData } from '../backend/functionality';
+import { exportRatings, getRatingsData } from '../backend/functionality';
 
 const SettingsPage: React.FC = () => {
   const [notifications, setNotifications] = useState(true);

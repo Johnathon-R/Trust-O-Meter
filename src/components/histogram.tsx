@@ -3,9 +3,6 @@ import { Star } from 'lucide-react'; // Assumes lucide-react is installed
 import { RatingData } from '../utils/customTypes';
 import { searchRatings } from '../backend/algorand';
 
-
-
-
 {/* Horizontal bar version */ }
 export default function RatingHistogram() {
   const [binCount, setBinCount] = useState(5);
@@ -88,7 +85,6 @@ export default function RatingHistogram() {
     </div>
   );
 }
-
 
 {/* 
 
