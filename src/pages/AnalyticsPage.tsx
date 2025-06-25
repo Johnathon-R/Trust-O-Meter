@@ -3,33 +3,36 @@ import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } fro
 import StarRating from '../components/StarRating';
 import RatingHistogram from '../components/histogram';
 import { getRatingsData } from '../backend/functionality';
-import { q } from 'framer-motion/client';
+import { RatingStats } from '../utils/customTypes';
 
-interface RatingData {
-  rating: number;
-  eventName: string;
-  timestamp: Date;
-}
-
-interface RatingStats {
-  averageRating: number;
-  totalRatings: number;
-  recentRatings: RatingData[];
-  ratingDistribution: number[];
-}
+// Floating dot component
+const FloatingDotsBackground = React.memo(() => {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {[...Array(20)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute animate-float"
+          style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}
+        >
+          <div className="w-2 h-2 bg-white rounded-full opacity-30"></div>
+        </div>
+      ))}
+    </div>
+  );
+});
 
 const AnalyticsPage: React.FC = () => {
   const [stats, setStats] = useState<RatingStats>({
-    averageRating: 4.2,
-    totalRatings: 147,
-    recentRatings: [
-      { rating: 5, eventName: 'Conference Presentation', timestamp: new Date('2025-01-20T10:30:00') },
-      { rating: 4, eventName: 'Workshop Session', timestamp: new Date('2025-01-20T09:15:00') },
-      { rating: 3, eventName: 'Team Meeting', timestamp: new Date('2025-01-19T16:45:00') },
-      { rating: 5, eventName: 'Product Launch', timestamp: new Date('2025-01-19T14:20:00') },
-      { rating: 4, eventName: 'Customer Service', timestamp: new Date('2025-01-19T11:30:00') },
-    ],
-    ratingDistribution: [2, 8, 15, 45, 77]
+    averageRating: 0,
+    totalRatings: 0,
+    recentRatings: [],
+    ratingDistribution: [],
   });
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -71,6 +74,8 @@ const AnalyticsPage: React.FC = () => {
         <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 dark:bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-4000"></div>
       </div>
+
+      <FloatingDotsBackground />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
