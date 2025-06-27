@@ -3,23 +3,41 @@ import { Link } from 'react-router-dom';
 import { Star, BarChart3, Shield, ArrowRight, Sparkles, Zap } from 'lucide-react';
 import { RatingData } from '../utils/customTypes';
 import { searchRatings } from '../backend/algorand';
+import { t } from '../utils/i18n';
 
 const HomePage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [ratings, setRatings] = useState<RatingData[]>([]);
+  const [showAnalytics, setShowAnalytics] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
+
+      // Check localStorage for analytics setting
+    const savedSettings = localStorage.getItem('trust-o-meter-settings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setShowAnalytics(settings.showAnalytics ?? true);
+    }
   }, []);
 
   useEffect(() => {
     const fetchRatings = async () => {
-      const data = await searchRatings();
-      setRatings(data);
+      // Only fetch if analytics are enabled
+      if (showAnalytics) {
+        const data = await searchRatings();
+        setRatings(data);
+      } else {
+        setRatings([]); // Clear ratings if analytics are disabled
+      }
     };
 
     fetchRatings();
-  }, []);
+  }, [showAnalytics]); // Add showAnalytics as dependency
+
+  const averageRating = ratings.length > 0 
+    ? ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length 
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black relative overflow-hidden transition-all duration-500">
@@ -63,18 +81,17 @@ const HomePage: React.FC = () => {
             </div>
 
             <h1 className="font-inter font-bold text-6xl md:text-8xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-6 animate-gradient-x">
-              Trust-O-Meter
+              {t('trustOMeter')}
             </h1>
 
             <div className={`transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <p className="font-inter text-2xl text-gray-300 dark:text-gray-400 mb-4 max-w-3xl mx-auto leading-relaxed">
-                Rate events with <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-semibold">transparent</span>,
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-semibold"> immutable</span> feedback powered by Algorand
+                {t('rateEventsTransparent')}
               </p>
 
               <p className="font-inter text-lg text-gray-400 dark:text-gray-500 max-w-xl mx-auto flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5 text-yellow-400" />
-                Simple, secure, and completely anonymous rating system
+                {t('simpleSecureAnonymous')}
                 <Sparkles className="w-5 h-5 text-yellow-400" />
               </p>
             </div>
@@ -88,8 +105,8 @@ const HomePage: React.FC = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:rotate-12 transition-transform duration-300">
                   <Star className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">Instant Rating</h3>
-                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">Submit ratings quickly and anonymously with verification</p>
+                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{t('instantRating')}</h3>
+                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">{t('instantRatingDesc')}</p>
               </div>
             </div>
 
@@ -99,8 +116,8 @@ const HomePage: React.FC = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:rotate-12 transition-transform duration-300">
                   <Shield className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">Blockchain Verified</h3>
-                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">Permanently recorded on Algorand for complete transparency</p>
+                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{t('blockchainVerified')}</h3>
+                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">{t('blockchainVerifiedDesc')}</p>
               </div>
             </div>
 
@@ -110,8 +127,8 @@ const HomePage: React.FC = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-orange-500 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:rotate-12 transition-transform duration-300">
                   <BarChart3 className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">Real-time Analytics</h3>
-                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">View comprehensive statistics and trends in real-time</p>
+                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{t('realTimeAnalytics')}</h3>
+                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">{t('realTimeAnalyticsDesc')}</p>
               </div>
             </div>
           </div>
@@ -125,7 +142,7 @@ const HomePage: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative flex items-center justify-center gap-2">
                 <Zap className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                <span>Rate Now</span>
+                <span>{t('rateNow')}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </div>
             </Link>
@@ -137,66 +154,68 @@ const HomePage: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative flex items-center justify-center gap-2">
                 <BarChart3 className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                <span>View Analytics</span>
+                <span>{t('viewAnalytics')}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </div>
             </Link>
           </div>
 
           {/* Stats Section */}
-          <div className={`mt-20 grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="text-center group">
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                {Math.round(ratings.length * 1.2 + 10)}
+          {showAnalytics && ratings.length > 0 && (
+            <div className={`mt-20 grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <div className="text-center group">
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {Math.round(ratings.length * 1.2 + 10)}
+                </div>
+                <div className="text-gray-400 dark:text-gray-500 font-inter">{t('activeUsers')}</div>
               </div>
-              <div className="text-gray-400 dark:text-gray-500 font-inter">Active Users</div>
-            </div>
-            <div className="text-center group">
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                {ratings.length}
+              <div className="text-center group">
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {ratings.length}
+                </div>
+                <div className="text-gray-400 dark:text-gray-500 font-inter">{t('totalRatings')}</div>
               </div>
-              <div className="text-gray-400 dark:text-gray-500 font-inter">Total Ratings</div>
-            </div>
-            <div className="text-center group">
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                {Math.round(ratings.reduce((acc, curr) => acc + curr.rating, 0) * 10) / 100}★
+              <div className="text-center group">
+                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
+                  {averageRating.toFixed(1)}★
+                </div>
+                <div className="text-gray-400 dark:text-gray-500 font-inter">{t('averageRating')}</div>
               </div>
-              <div className="text-gray-400 dark:text-gray-500 font-inter">Average Rating</div>
             </div>
-          </div>
+          )}
           <br></br><br></br>
+          </div>
         </div>
-      </div>
 
-      <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        {ratings.map(r => (
-          <div className="group relative flex-col">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
-            <div key={r.id} className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-              <div>
-                <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{r.eventName}</h3>
-                {/* <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">{r.rating}</p> */}
-              </div>
-              <div className=" flex gap-3">
-                {[...Array(5)].map((_, i) => {
-                  const fill = Math.min(Math.max(r.rating - i, 0), 1) * 100;
-                  return (
-                    <div key={i} className="relative w-6 h-6">
-
-                      {/* Filled star (foreground mask) */}
-                      <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
-                        style={{ width: `${fill}%` }}
-                      >
-                        <Star className={`w-6 h-6 fill-yellow-400`} />
+      {showAnalytics && (
+        <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          {ratings.map(r => (
+            <div key={r.id} className="group relative flex-col">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
+              <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                <div>
+                  <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{r.eventName}</h3>
+                </div>
+                <div className=" flex gap-3">
+                  {[...Array(5)].map((_, i) => {
+                    const fill = Math.min(Math.max(r.rating - i, 0), 1) * 100;
+                    return (
+                      <div key={i} className="relative w-6 h-6">
+                        {/* Filled star (foreground mask) */}
+                        <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
+                          style={{ width: `${fill}%` }}
+                        >
+                          <Star className={`w-6 h-6 fill-yellow-400`} />
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

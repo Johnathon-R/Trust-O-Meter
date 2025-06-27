@@ -3,6 +3,7 @@ import { Star, Send, AlertCircle, Sparkles } from 'lucide-react';
 import StarRating from '../components/Stars';
 import { Location } from '../utils/customTypes';
 import { submitRatingToAlgorand } from '../backend/algorand';
+import { t } from '../utils/i18n';
 
 // Create a separate component for the floating dots
 const FloatingDotsBackground = React.memo(() => {
@@ -34,42 +35,38 @@ const RatingPage: React.FC = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
-  {/** Implement the searching for event feature here
-
-  const handleEventSearch = async () => {
-    if (!eventName) return;
-
-    const found = await searchEventInBackend(eventName, eventLocation);
-    if (!found) {
-      setMessage({ type: 'error', text: 'Event not found in our records.' });
-    }
+  const getRatingText = (rating: number) => {
+    if (rating === 0) return t('selectRating');
+    if (rating > 0 && rating <= 1) return t('poorExperience');
+    if (rating > 1 && rating <= 2) return t('belowAverage');
+    if (rating > 2 && rating <= 3) return t('averageExperience');
+    if (rating > 3 && rating <= 4) return t('goodExperience');
+    if (rating > 4) return t('excellentExperience');
+    return t('selectRating');
   };
-
-  */}
 
   const handleSubmitRating = async () => {
     if (isSubmitting) {
-      setMessage({type: "error", text:"Please wait for previous rating to submit."});
+      setMessage({type: "error", text: t('pleaseWaitPrevious')});
       return;
     }
 
     if (rating === 0) {
-      setMessage({ type: "error", text: "Please select a rating before submitting." });
+      setMessage({ type: "error", text: t('pleaseSelectRating') });
       return;
     }
 
     if (!eventName.trim()) {
-      setMessage({ type: "error", text: "Please enter an event name." });
+      setMessage({ type: "error", text: t('pleaseEnterEventName') });
       return;
     }
 
     if (!eventLocation.trim()) {
-      setMessage({ type: "error", text: "Please enter an event Location..." });
+      setMessage({ type: "error", text: t('pleaseEnterEventLocation') });
       return;
     }
 
@@ -84,15 +81,15 @@ const RatingPage: React.FC = () => {
       const success = await submitRatingToAlgorand(rating, `${eventName.trim()}`, location);
 
       if (success) {
-        setMessage({ type: "success", text: "Rating submitted successfully to the blockchain!" });
+        setMessage({ type: "success", text: t('ratingSubmittedSuccess') });
         setRating(0);
         setEventName('');
         setEventLocation('');
       } else {
-        setMessage({ type: "error", text: "Failed to submit rating. Please try again." });
+        setMessage({ type: "error", text: t('failedToSubmitRating') });
       }
     } catch (err) {
-      setMessage({ type: "error", text: "Error submitting rating. Plaese try again." });
+      setMessage({ type: "error", text: t('errorSubmittingRating') });
     } finally {
       setIsSubmitting(false);
     }
@@ -114,12 +111,12 @@ const RatingPage: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <Sparkles className="w-8 h-8 text-yellow-400 mr-2" />
             <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              Submit Your Rating
+              {t('submitYourRating')}
             </h1>
             <Sparkles className="w-8 h-8 text-yellow-400 ml-2" />
           </div>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
-            Rate your experience on the Algorand blockchain
+            {t('rateYourExperience')}
           </p>
         </div>
         <div className={`group relative transition-all duration-1000 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
@@ -130,19 +127,14 @@ const RatingPage: React.FC = () => {
             <div className="mb-8">
               <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
                 <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-                Your Rating
+                {t('yourRating')}
               </label>
               <div className="bg-white/5 dark:bg-gray-700/30 rounded-xl p-6 hover:bg-white/10 dark:hover:bg-gray-700/50 transition-all duration-300">
                 <div className="flex justify-center scale-150">
                   <StarRating value={rating} onChange={setRating} />
                 </div>
                 <p className="font-inter text-gray-300 dark:text-gray-400 mt-4 text-center text-lg">
-                  {rating === 0 && 'Select a rating'}
-                  {rating > 0 && rating <= 1 && '⭐ Poor experience'}
-                  {rating > 1 && rating <= 2 && '⭐⭐ Below average'}
-                  {rating > 2 && rating <= 3 && '⭐⭐⭐ Average experience'}
-                  {rating > 3 && rating <= 4 && '⭐⭐⭐⭐ Good experience'}
-                  {rating > 4 && '⭐⭐⭐⭐⭐ Excellent experience'}
+                  {getRatingText(rating)}
                 </p>
               </div>
             </div>
@@ -152,11 +144,11 @@ const RatingPage: React.FC = () => {
               {/** Event Name Input */}
               <div>
                 <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-2 block">
-                  Event Name
+                  {t('eventName')}
                 </label>
                 <input
                   type="text"
-                  placeholder="Type the name of the event..."
+                  placeholder={t('eventNamePlaceholder')}
                   value={eventName}
                   onChange={(e) => setEventName(e.target.value)}
                   className="w-full bg-white/10 dark:bg-gray-700/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 rounded-xl px-6 py-4 text-white dark:text-gray-200 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-300 hover:scal-[1.02]"
@@ -166,11 +158,11 @@ const RatingPage: React.FC = () => {
               {/** Event Location Input */}
               <div>
                 <label className="font-inter font-semibold text-xl text-white dark:text-gray-100 mb-2 block">
-                  Event Location
+                  {t('eventLocation')}
                 </label>
                 <input
                   type="text"
-                  placeholder="Enter the event location (e.g., Toronto, ON)"
+                  placeholder={t('eventLocationPlaceholder')}
                   value={eventLocation}
                   onChange={(e) => setEventLocation(e.target.value)}
                   className="w-full bg-white/10 dark:bg-gray-700/50 backdrop-blur-lg border border-white/30 dark:border-gray-600/50 rounded-xl px-6 py-4 text-white dark:text-gray-200 font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-300 hover:scale-[1.02]"
@@ -193,7 +185,7 @@ const RatingPage: React.FC = () => {
               <div className="relative flex items-center gap-2">
                 <Send className={`w-6 h-6 ${!(isSubmitting || rating === 0) ? 'group-hover:rotate-12' : ''} transition-transform duration-300`} />
                 <span>
-                  {isSubmitting ? 'Submitting...' : 'Submit Rating'}
+                  {isSubmitting ? t('submitting') : t('submitRating')}
                 </span>
               </div>
             </button>

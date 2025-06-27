@@ -1,7 +1,6 @@
 import { RatingData, RatingStats } from "../utils/customTypes";
 import { searchRatings } from "./algorand";
 
-
 /**
  * @brief Calculate the statistics for the ratings.
  * @returns 
@@ -18,14 +17,15 @@ export const calculateStats = async (): Promise<RatingStats> => {
     };
   }
 
-  // Calculate average rating
+  // Calculate average rating - fixed calculation
   const totalScore = ratings.reduce((sum, rating) => sum + rating.rating, 0);
   const averageRating = totalScore / ratings.length;
 
   // Calculate rating distribution
   const distribution = [0, 0, 0, 0, 0];
   ratings.forEach(rating => {
-    distribution[rating.rating - 1]++;
+    const ratingIndex = Math.min(Math.max(Math.floor(rating.rating) - 1, 0), 4);
+    distribution[ratingIndex]++;
   });
 
   // Get recent ratings (sorted by timestamp, most recent first)
@@ -52,7 +52,8 @@ export const getRatingsData = async (): Promise<RatingStats> => {
     
   } catch (error) {
     console.error('Error fetching ratings data:', error);
-    return {averageRating: 0,
+    return {
+      averageRating: 0,
       totalRatings: 0,
       recentRatings: [],
       ratingDistribution: [],

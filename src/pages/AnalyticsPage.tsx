@@ -4,6 +4,7 @@ import StarRating from '../components/StarRating';
 import RatingHistogram from '../components/histogram';
 import { getRatingsData } from '../backend/functionality';
 import { RatingStats } from '../utils/customTypes';
+import { t, getCurrentLanguage } from '../utils/i18n';
 
 // Floating dot component
 const FloatingDotsBackground = React.memo(() => {
@@ -45,9 +46,28 @@ const AnalyticsPage: React.FC = () => {
   const loadRatingsData = async () => {
     setLoading(true);
     try {
-      const data = await getRatingsData();
-      if (data) {
-        setStats(data);
+      // Check if analytics should be shown based on settings
+      const savedSettings = localStorage.getItem('trust-o-meter-settings');
+      let showAnalytics = true;
+      
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        showAnalytics = settings.showAnalytics ?? true;
+      }
+
+      if (showAnalytics) {
+        const data = await getRatingsData();
+        if (data) {
+          setStats(data);
+        }
+      } else {
+        // Show empty stats if analytics are disabled
+        setStats({
+          averageRating: 0,
+          totalRatings: 0,
+          recentRatings: [],
+          ratingDistribution: [],
+        });
       }
     } catch (error) {
       console.error('Error loading ratings data:', error);
@@ -60,10 +80,10 @@ const AnalyticsPage: React.FC = () => {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return 'Just now';
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 1) return t('justNow');
+    if (diffInHours < 24) return `${diffInHours}${t('hoursAgo')}`;
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    return `${diffInDays}${t('daysAgo')}`;
   };
 
   return (
@@ -83,12 +103,12 @@ const AnalyticsPage: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <BarChart3 className="w-8 h-8 text-blue-400 dark:text-blue-300 mr-2" />
             <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 dark:from-blue-300 dark:to-purple-300">
-              Rating Analytics
+              {t('ratingAnalytics')}
             </h1>
             <Sparkles className="w-8 h-8 text-yellow-400 dark:text-yellow-300 ml-2" />
           </div>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
-            Transparent feedback powered by blockchain technology
+            {t('transparentFeedback')}
           </p>
         </div>
 
@@ -106,7 +126,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.averageRating.toFixed(1)}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">Average Rating</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t('averageRating')}</p>
               <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => { }} readonly size="sm" />
             </div>
           </div>
@@ -123,7 +143,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.totalRatings.toLocaleString()}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400">Total Ratings</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400">{t('totalRatings')}</p>
             </div>
           </div>
 
@@ -139,7 +159,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.recentRatings.length}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400">Recent Reviews</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400">{t('recentRatings')}</p>
             </div>
           </div>
         </div>
@@ -155,7 +175,7 @@ const AnalyticsPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-purple-400 dark:text-purple-300" />
-                Recent Ratings
+                {t('recentRatings')}
               </h2>
               <button
                 onClick={loadRatingsData}
@@ -163,7 +183,7 @@ const AnalyticsPage: React.FC = () => {
                 className="group/btn flex items-center space-x-2 px-4 py-2 bg-white/10 dark:bg-gray-700/50 text-blue-400 dark:text-blue-300 rounded-xl hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all duration-300 disabled:opacity-50 hover:scale-105"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover/btn:rotate-180'} transition-transform duration-300`} />
-                <span className="font-inter font-medium">Refresh</span>
+                <span className="font-inter font-medium">{t('refresh')}</span>
               </button>
             </div>
 
@@ -179,7 +199,7 @@ const AnalyticsPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>
-                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">Anonymous User</p>
+                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('anonymousUser')}</p>
                     </div>
                   </div>
                   <div className="text-right">
