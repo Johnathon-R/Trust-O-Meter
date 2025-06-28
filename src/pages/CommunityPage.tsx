@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, MessageCircle, TrendingUp, Award, Calendar, ExternalLink, Sparkles } from 'lucide-react';
+import { Users, MessageCircle, TrendingUp, Award, Calendar, Sparkles } from 'lucide-react';
 import { searchRatings } from '../backend/algorand';
 import { RatingData } from '../utils/customTypes';
 import { useTranslation } from '../backend/useTranslation.ts';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Bell, Shield, Moon, Sun, Download, Trash2 } from 'lucide-react';
+import { Settings, Bell, Shield, Moon, Sun, Download } from 'lucide-react';
 import { searchRatings } from '../backend/algorand';
 import { RatingData } from '../utils/customTypes';
 import { useTranslation } from '../backend/useTranslation.ts';

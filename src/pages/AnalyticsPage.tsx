@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles, Lock } from 'lucide-react';
-import StarRating from '../components/StarRating';
 import RatingHistogram from '../components/histogram';
 import { getRatingsData } from '../backend/functionality';
 import { RatingStats } from '../utils/customTypes';
