@@ -189,7 +189,8 @@ const HomePage: React.FC = () => {
                     ? (Math.round(
                         (ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length) * 100
                       ) / 100).toFixed(1)
-                    : 'N/A'}★                </div>
+                    : 'N/A'}★
+                  </div>
                 <div className="text-gray-400 dark:text-gray-500 font-inter">{t.home.stats.averageRating}</div>
               </div>
             </div>
@@ -201,7 +202,7 @@ const HomePage: React.FC = () => {
       {/* Rating Cards Section - Only show if analytics is enabled */}
       {showAnalytics && ratings.length > 0 && (
         <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          {ratings.map(r => (
+          {ratings.slice(0,9).map(r => (
             <div key={r.id} className="group relative flex-col">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
               <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
