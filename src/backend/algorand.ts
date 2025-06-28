@@ -44,15 +44,9 @@ export const submitRatingToAlgorand = async (
 
     const signedTxn = txn.signTxn(sender.sk);
     const txId = await algodClient.sendRawTransaction(signedTxn).do();
+    await algosdk.waitForConfirmation(algodClient, txId.txid, 4);
 
-    try {
-      await algosdk.waitForConfirmation(algodClient, txId.txid, 4);
-    } catch (confirmationError) {
-      console.warn("Transaction submitted but confirmation failed:", confirmationError);
-      // You may want to log this txId somewhere for later querying
-    }
-
-    return true;
+    return true;;
   } catch (err) {
     console.error("Blockchain error: ", err);
     return false;

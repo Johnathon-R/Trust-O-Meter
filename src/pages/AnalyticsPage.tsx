@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } from 'lucide-react';
+import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles, Lock } from 'lucide-react';
 import StarRating from '../components/StarRating';
 import RatingHistogram from '../components/histogram';
 import { getRatingsData } from '../backend/functionality';
 import { RatingStats } from '../utils/customTypes';
-import { t, getCurrentLanguage } from '../utils/i18n';
+import { useTranslation } from '../backend/useTranslation.ts';
+import { getSetting } from '../utils/settings';
 
 // Floating dot component
 const FloatingDotsBackground = React.memo(() => {
@@ -37,37 +38,42 @@ const AnalyticsPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsVisible(true);
     loadRatingsData();
+    
+    // Check analytics setting
+    const analyticsEnabled = getSetting('showAnalytics');
+    setShowAnalytics(analyticsEnabled);
+  }, []);
+
+  // Listen for settings changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const analyticsEnabled = getSetting('showAnalytics');
+      setShowAnalytics(analyticsEnabled);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check for changes periodically (for same-tab updates)
+    const interval = setInterval(handleStorageChange, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const loadRatingsData = async () => {
     setLoading(true);
     try {
-      // Check if analytics should be shown based on settings
-      const savedSettings = localStorage.getItem('trust-o-meter-settings');
-      let showAnalytics = true;
-      
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        showAnalytics = settings.showAnalytics ?? true;
-      }
-
-      if (showAnalytics) {
-        const data = await getRatingsData();
-        if (data) {
-          setStats(data);
-        }
-      } else {
-        // Show empty stats if analytics are disabled
-        setStats({
-          averageRating: 0,
-          totalRatings: 0,
-          recentRatings: [],
-          ratingDistribution: [],
-        });
+      const data = await getRatingsData();
+      if (data) {
+        setStats(data);
       }
     } catch (error) {
       console.error('Error loading ratings data:', error);
@@ -80,11 +86,66 @@ const AnalyticsPage: React.FC = () => {
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return t('justNow');
-    if (diffInHours < 24) return `${diffInHours}${t('hoursAgo')}`;
+    if (diffInHours < 1) return t.analytics.timeAgo.justNow;
+    if (diffInHours < 24) return `${diffInHours}${t.analytics.timeAgo.hoursAgo}`;
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}${t('daysAgo')}`;
+    return `${diffInDays}${t.analytics.timeAgo.daysAgo}`;
   };
+
+  // If analytics is disabled, show privacy message
+  if (!showAnalytics) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-colors duration-300">
+        {/* Animated background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 dark:bg-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob"></div>
+          <div className="absolute top-40 right-10 w-72 h-72 bg-blue-500 dark:bg-blue-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 dark:bg-pink-600 rounded-full mix-blend-multiply filter blur-xl opacity-20 dark:opacity-15 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <FloatingDotsBackground />
+
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <div className="text-center">
+            <div className="flex items-center justify-center mb-6 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-full blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative bg-gradient-to-r from-orange-500 to-red-600 p-4 rounded-full group-hover:scale-110 transition-transform duration-300">
+                  <Lock className="w-16 h-16 text-white" />
+                </div>
+              </div>
+            </div>
+
+            <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400 mb-6">
+              Analytics Privacy Mode
+            </h1>
+
+            <div className="group relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+              <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-6 mx-auto">
+                  <Lock className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-4">
+                  Analytics Display Disabled
+                </h2>
+                <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed mb-6">
+                  You have chosen to hide analytics data for privacy. Your ratings are still being recorded on the blockchain, but the analytics display is disabled.
+                </p>
+                <p className="font-inter text-gray-400 dark:text-gray-500 text-sm mb-6">
+                  To view analytics data, you can enable "Show in Analytics" in your Settings.
+                </p>
+                <a href="/settings" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-inter font-medium hover:from-orange-700 hover:to-red-700 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                  <span>Go to Settings</span>
+                  <Lock className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-gray-900 dark:via-gray-800 dark:to-black py-12 px-4 relative overflow-hidden transition-colors duration-300">
@@ -103,12 +164,12 @@ const AnalyticsPage: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <BarChart3 className="w-8 h-8 text-blue-400 dark:text-blue-300 mr-2" />
             <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 dark:from-blue-300 dark:to-purple-300">
-              {t('ratingAnalytics')}
+              {t.analytics.title}
             </h1>
             <Sparkles className="w-8 h-8 text-yellow-400 dark:text-yellow-300 ml-2" />
           </div>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
-            {t('transparentFeedback')}
+            {t.analytics.subtitle}
           </p>
         </div>
 
@@ -126,7 +187,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.averageRating.toFixed(1)}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t('averageRating')}</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t.analytics.averageRating}</p>
               <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => { }} readonly size="sm" />
             </div>
           </div>
@@ -143,7 +204,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.totalRatings.toLocaleString()}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400">{t('totalRatings')}</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400">{t.analytics.totalRatings}</p>
             </div>
           </div>
 
@@ -159,7 +220,7 @@ const AnalyticsPage: React.FC = () => {
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
                 {stats.recentRatings.length}
               </h3>
-              <p className="font-inter text-gray-300 dark:text-gray-400">{t('recentRatings')}</p>
+              <p className="font-inter text-gray-300 dark:text-gray-400">{t.analytics.recentReviews}</p>
             </div>
           </div>
         </div>
@@ -175,7 +236,7 @@ const AnalyticsPage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-purple-400 dark:text-purple-300" />
-                {t('recentRatings')}
+                {t.analytics.recentRatings}
               </h2>
               <button
                 onClick={loadRatingsData}
@@ -183,7 +244,7 @@ const AnalyticsPage: React.FC = () => {
                 className="group/btn flex items-center space-x-2 px-4 py-2 bg-white/10 dark:bg-gray-700/50 text-blue-400 dark:text-blue-300 rounded-xl hover:bg-white/20 dark:hover:bg-gray-600/50 transition-all duration-300 disabled:opacity-50 hover:scale-105"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : 'group-hover/btn:rotate-180'} transition-transform duration-300`} />
-                <span className="font-inter font-medium">{t('refresh')}</span>
+                <span className="font-inter font-medium">{t.analytics.refresh}</span>
               </button>
             </div>
 
@@ -199,7 +260,7 @@ const AnalyticsPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>
-                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('anonymousUser')}</p>
+                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t.analytics.anonymousUser}</p>
                     </div>
                   </div>
                   <div className="text-right">

@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Shield, Star, BarChart3, Info, Users, Settings, Menu, X } from 'lucide-react';
-import { t } from '../utils/i18n';
+import { useTranslation } from '../backend/useTranslation.ts';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
   
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = [
-    { path: '/rate', label: t('rate'), icon: Star },
-    { path: '/feedback', label: t('analytics'), icon: BarChart3 },
-    { path: '/about', label: t('about'), icon: Info },
-    { path: '/community', label: t('community'), icon: Users },
-    { path: '/settings', label: t('settings'), icon: Settings },
+    { path: '/rate', label: t.nav.rate, icon: Star },
+    { path: '/feedback', label: t.nav.analytics, icon: BarChart3 },
+    { path: '/about', label: t.nav.about, icon: Info },
+    { path: '/community', label: t.nav.community, icon: Users },
+    { path: '/settings', label: t.nav.settings, icon: Settings },
   ];
 
   return (
@@ -33,7 +34,7 @@ const Navigation: React.FC = () => {
               </div>
             </div>
             <span className="font-inter font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              {t('trustOMeter')}
+              Trust-O-Meter
             </span>
           </Link>
 

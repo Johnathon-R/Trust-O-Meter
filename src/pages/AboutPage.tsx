@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Shield, BarChart3, Lock, Zap, Sparkles } from 'lucide-react';
+import { useTranslation } from '../backend/useTranslation.ts';
 
 const AboutPage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setIsVisible(true);
@@ -47,11 +49,10 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
           <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-4">
-            About Trust-O-Meter
+            {t.about.title}
           </h1>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400 max-w-2xl mx-auto">
-            A revolutionary rating system built on blockchain technology to ensure transparency, 
-            immutability, and complete anonymity in feedback collection.
+            {t.about.subtitle}
           </p>
         </div>
 
@@ -61,16 +62,13 @@ const AboutPage: React.FC = () => {
           <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
             <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-4 flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-yellow-400" />
-              Our Mission
+              {t.about.mission.title}
             </h2>
             <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed mb-4">
-              Trust-O-Meter was created to solve the fundamental problem of trust in rating systems. 
-              Traditional platforms can manipulate, delete, or alter ratings, making it difficult to 
-              trust the authenticity of feedback.
+              {t.about.mission.description1}
             </p>
             <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed">
-              By leveraging the Algorand blockchain, we ensure that every rating is permanently recorded, 
-              completely transparent, and impossible to manipulate while maintaining user anonymity.
+              {t.about.mission.description2}
             </p>
           </div>
         </div>
@@ -83,9 +81,9 @@ const AboutPage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
                 <Lock className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">Complete Anonymity</h3>
+              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">{t.about.features.anonymity.title}</h3>
               <p className="font-inter text-gray-300 dark:text-gray-400">
-                Your identity is never revealed. Rate freely without fear of retaliation or bias.
+                {t.about.features.anonymity.description}
               </p>
             </div>
           </div>
@@ -96,9 +94,9 @@ const AboutPage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
                 <Shield className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">Immutable Records</h3>
+              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">{t.about.features.immutable.title}</h3>
               <p className="font-inter text-gray-300 dark:text-gray-400">
-                Once submitted, ratings cannot be altered or deleted, ensuring permanent transparency.
+                {t.about.features.immutable.description}
               </p>
             </div>
           </div>
@@ -109,9 +107,9 @@ const AboutPage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
                 <Zap className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">Instant Verification</h3>
+              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">{t.about.features.instantVerification.title}</h3>
               <p className="font-inter text-gray-300 dark:text-gray-400">
-                All ratings are instantly verified and recorded on the Algorand blockchain.
+                {t.about.features.instantVerification.description}
               </p>
             </div>
           </div>
@@ -122,9 +120,9 @@ const AboutPage: React.FC = () => {
               <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:rotate-12 transition-transform duration-300">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">Real-time Analytics</h3>
+              <h3 className="font-inter font-semibold text-lg text-white dark:text-gray-100 mb-2">{t.about.features.realTimeAnalytics.title}</h3>
               <p className="font-inter text-gray-300 dark:text-gray-400">
-                View comprehensive statistics and trends based on authentic, unalterable data.
+                {t.about.features.realTimeAnalytics.description}
               </p>
             </div>
           </div>
@@ -136,7 +134,7 @@ const AboutPage: React.FC = () => {
           <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
             <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-6 flex items-center gap-2">
               <Zap className="w-6 h-6 text-purple-400" />
-              How It Works
+              {t.about.howItWorks.title}
             </h2>
             <div className="space-y-6">
               <div className="flex items-start space-x-4 group/step hover:scale-105 transition-transform duration-300">
@@ -144,8 +142,8 @@ const AboutPage: React.FC = () => {
                   <span className="font-inter font-bold text-white">1</span>
                 </div>
                 <div>
-                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">Submit Your Rating</h3>
-                  <p className="font-inter text-gray-300 dark:text-gray-400">Choose your rating and event type through our simple interface.</p>
+                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">{t.about.howItWorks.steps.submit.title}</h3>
+                  <p className="font-inter text-gray-300 dark:text-gray-400">{t.about.howItWorks.steps.submit.description}</p>
                 </div>
               </div>
 
@@ -154,8 +152,8 @@ const AboutPage: React.FC = () => {
                   <span className="font-inter font-bold text-white">2</span>
                 </div>
                 <div>
-                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">Instant Processing</h3>
-                  <p className="font-inter text-gray-300 dark:text-gray-400">Your rating is processed and prepared for blockchain submission.</p>
+                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">{t.about.howItWorks.steps.process.title}</h3>
+                  <p className="font-inter text-gray-300 dark:text-gray-400">{t.about.howItWorks.steps.process.description}</p>
                 </div>
               </div>
 
@@ -164,8 +162,8 @@ const AboutPage: React.FC = () => {
                   <span className="font-inter font-bold text-white">3</span>
                 </div>
                 <div>
-                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">Blockchain Recording</h3>
-                  <p className="font-inter text-gray-300 dark:text-gray-400">Your rating is permanently recorded on the Algorand blockchain.</p>
+                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">{t.about.howItWorks.steps.record.title}</h3>
+                  <p className="font-inter text-gray-300 dark:text-gray-400">{t.about.howItWorks.steps.record.description}</p>
                 </div>
               </div>
 
@@ -174,8 +172,8 @@ const AboutPage: React.FC = () => {
                   <span className="font-inter font-bold text-white">4</span>
                 </div>
                 <div>
-                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">View Analytics</h3>
-                  <p className="font-inter text-gray-300 dark:text-gray-400">Access real-time statistics and trends based on all submitted ratings.</p>
+                  <h3 className="font-inter font-semibold text-white dark:text-gray-100 mb-1">{t.about.howItWorks.steps.view.title}</h3>
+                  <p className="font-inter text-gray-300 dark:text-gray-400">{t.about.howItWorks.steps.view.description}</p>
                 </div>
               </div>
             </div>
@@ -188,28 +186,27 @@ const AboutPage: React.FC = () => {
           <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/15 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
             <h2 className="font-inter font-bold text-2xl text-white dark:text-gray-100 mb-4 flex items-center gap-2">
               <Shield className="w-6 h-6 text-green-400" />
-              Built on Algorand
+              {t.about.technology.title}
             </h2>
             <p className="font-inter text-gray-300 dark:text-gray-400 leading-relaxed mb-4">
-              We chose Algorand for its exceptional speed, low transaction costs, and environmental sustainability. 
-              The Algorand blockchain provides the perfect foundation for our rating system with its:
+              {t.about.technology.description}
             </p>
             <ul className="space-y-3">
               <li className="flex items-center space-x-3 group/item hover:scale-105 transition-transform duration-300">
                 <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full group-hover/item:scale-150 transition-transform duration-300"></div>
-                <span className="font-inter text-gray-300 dark:text-gray-400">Instant transaction finality</span>
+                <span className="font-inter text-gray-300 dark:text-gray-400">{t.about.technology.features.instant}</span>
               </li>
               <li className="flex items-center space-x-3 group/item hover:scale-105 transition-transform duration-300">
                 <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full group-hover/item:scale-150 transition-transform duration-300"></div>
-                <span className="font-inter text-gray-300 dark:text-gray-400">Minimal transaction fees</span>
+                <span className="font-inter text-gray-300 dark:text-gray-400">{t.about.technology.features.minimal}</span>
               </li>
               <li className="flex items-center space-x-3 group/item hover:scale-105 transition-transform duration-300">
                 <div className="w-3 h-3 bg-gradient-to-r from-pink-500 to-orange-600 rounded-full group-hover/item:scale-150 transition-transform duration-300"></div>
-                <span className="font-inter text-gray-300 dark:text-gray-400">Carbon-negative consensus mechanism</span>
+                <span className="font-inter text-gray-300 dark:text-gray-400">{t.about.technology.features.carbon}</span>
               </li>
               <li className="flex items-center space-x-3 group/item hover:scale-105 transition-transform duration-300">
                 <div className="w-3 h-3 bg-gradient-to-r from-orange-500 to-red-600 rounded-full group-hover/item:scale-150 transition-transform duration-300"></div>
-                <span className="font-inter text-gray-300 dark:text-gray-400">Proven security and decentralization</span>
+                <span className="font-inter text-gray-300 dark:text-gray-400">{t.about.technology.features.security}</span>
               </li>
             </ul>
           </div>

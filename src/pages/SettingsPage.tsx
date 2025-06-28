@@ -3,16 +3,18 @@ import { Settings, Bell, Shield, Moon, Sun, Download, Trash2 } from 'lucide-reac
 import { exportRatings } from '../backend/functionality';
 import { searchRatings } from '../backend/algorand';
 import { RatingData } from '../utils/customTypes';
-import { t, getCurrentLanguage, type Language } from '../utils/i18n';
+import { useTranslation } from '../backend/useTranslation.ts';
 
 const SettingsPage: React.FC = () => {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState('en');
   const [showAnalytics, setShowAnalytics] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [ratings, setRatings] = useState<RatingData[]>([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const { t, changeLanguage } = useTranslation();
 
   const saveSettings = () => {
     const settings = {
@@ -57,36 +59,52 @@ const SettingsPage: React.FC = () => {
     };
 
     fetchRatings();
+    
+    // Mark initial load as complete after a short delay
+    setTimeout(() => setIsInitialLoad(false), 100);
   }, []);
 
   // Save settings when they change (but not on initial load)
   useEffect(() => {
-    if (isVisible) {
+    if (!isInitialLoad) {
       saveSettings();
     }
-  }, [notifications, darkMode, language, showAnalytics, isVisible]);
+  }, [notifications, darkMode, language, showAnalytics, isInitialLoad]); 
 
   const handleExportData = () => {
-    const data = JSON.stringify(ratings, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `trust-o-meter-ratings-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (!ratings || ratings.length === 0) {
+      alert("No ratings found to export.");
+      return;
+    }
+
+    console.log("Exporting ratings:", ratings); // Debug log
+
+    try {
+      const data = JSON.stringify(ratings, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trust-o-meter-ratings-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Something went wrong while exporting the file.");
+    }
   };
 
+  const handleToggleAnalytics = () => {
+    setShowAnalytics(!showAnalytics);
+  };
+
+  // Function to change language
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLanguage = e.target.value as Language;
+    const newLanguage = e.target.value;
     setLanguage(newLanguage);
-    
-    // Reload page after a short delay to apply language changes
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    changeLanguage(newLanguage as any);
   };
 
   const totalRatings = ratings.length;
@@ -141,10 +159,10 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
           <h1 className="font-inter font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
-            {t('settingsTitle')}
+            {t.settings.title}
           </h1>
           <p className="font-inter text-lg text-gray-300 dark:text-gray-400">
-            {t('customizeExperience')}
+            {t.settings.subtitle}
           </p>
         </div>
 
@@ -157,14 +175,14 @@ const SettingsPage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                   <Settings className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t('general')}</h2>
+                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t.settings.general.title}</h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between group/item hover:scale-105 transition-transform duration-300">
                   <div>
-                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('language')}</h3>
-                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('chooseLanguage')}</p>
+                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t.settings.general.language}</h3>
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t.settings.general.languageDescription}</p>
                   </div>
                   <select
                     value={language}
@@ -184,8 +202,8 @@ const SettingsPage: React.FC = () => {
                       {darkMode ? <Moon className="w-4 h-4 text-white" /> : <Sun className="w-4 h-4 text-white" />}
                     </div>
                     <div>
-                      <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('darkMode')}</h3>
-                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('switchDarkTheme')}</p>
+                      <h3 className="font-inter font-medium text-white dark:text-gray-200">{t.settings.general.darkMode}</h3>
+                      <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t.settings.general.darkModeDescription}</p>
                     </div>
                   </div>
                   <ToggleSwitch enabled={darkMode} onChange={() => setDarkMode(!darkMode)} />
@@ -202,14 +220,14 @@ const SettingsPage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                   <Bell className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t('notifications')}</h2>
+                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t.settings.notifications.title}</h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between group/item hover:scale-105 transition-transform duration-300">
                   <div>
-                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('pushNotifications')}</h3>
-                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('receiveNotifications')}</p>
+                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t.settings.notifications.push}</h3>
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t.settings.notifications.pushDescription}</p>
                   </div>
                   <ToggleSwitch enabled={notifications} onChange={() => setNotifications(!notifications)} />
                 </div>
@@ -225,22 +243,22 @@ const SettingsPage: React.FC = () => {
                 <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t('privacyData')}</h2>
+                <h2 className="font-inter font-bold text-xl text-white dark:text-gray-100">{t.settings.privacy.title}</h2>
               </div>
 
               <div className="space-y-6">
                 <div className="flex items-center justify-between group/item hover:scale-105 transition-transform duration-300">
                   <div>
-                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t('showInAnalytics')}</h3>
-                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t('includeRatingsAnalytics')}</p>
+                    <h3 className="font-inter font-medium text-white dark:text-gray-200">{t.settings.privacy.showAnalytics}</h3>
+                    <p className="font-inter text-gray-400 dark:text-gray-500 text-sm">{t.settings.privacy.showAnalyticsDescription}</p>
                   </div>
-                  <ToggleSwitch enabled={showAnalytics} onChange={() => setShowAnalytics(!showAnalytics)} />
+                  <ToggleSwitch enabled={showAnalytics} onChange={handleToggleAnalytics} />
                 </div>
 
                 <div className="border-t border-white/20 dark:border-gray-700/50 pt-6">
-                  <h3 className="font-inter font-medium text-white dark:text-gray-200 mb-3">{t('dataExport')}</h3>
+                  <h3 className="font-inter font-medium text-white dark:text-gray-200 mb-3">{t.settings.privacy.dataExport}</h3>
                   <p className="font-inter text-gray-400 dark:text-gray-500 text-sm mb-4">
-                    {`${totalRatings} ${totalRatings !== 1 ? t('ratings') : t('ratingsStored')}`}
+                    You have {totalRatings} {t.settings.privacy.ratingsStored}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
@@ -248,7 +266,7 @@ const SettingsPage: React.FC = () => {
                       className="group px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-inter font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
                     >
                       <Download className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                      <span>{t('exportData')}</span>
+                      <span>{t.settings.privacy.exportData}</span>
                     </button>
                   </div>
                 </div>
@@ -262,17 +280,17 @@ const SettingsPage: React.FC = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full">
               <h3 className="font-inter font-bold text-xl text-gray-900 dark:text-gray-100 mb-4">
-                {t('clearAllDataConfirm')}
+                {t.settings.privacy.clearConfirm.title}
               </h3>
               <p className="font-inter text-gray-600 dark:text-gray-300 mb-6">
-                {`${t('actionCannotUndone')} (${totalRatings} ${t('totalRatings').toLowerCase()})`}
+                {t.settings.privacy.clearConfirm.description.replace('will be permanently deleted from local storage.', `(${totalRatings} total) will be permanently deleted from local storage.`)}
               </p>
               <div className="flex space-x-4">
                 <button
                   onClick={() => setShowClearConfirm(false)}
                   className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-inter font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
                 >
-                  {t('cancel')}
+                  {t.settings.privacy.clearConfirm.cancel}
                 </button>
               </div>
             </div>

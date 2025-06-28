@@ -2,43 +2,29 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Star } from 'lucide-react'; // Assumes lucide-react is installed
 import { RatingData } from '../utils/customTypes';
 import { searchRatings } from '../backend/algorand';
-import { t, getCurrentLanguage } from '../utils/i18n';
+import { useTranslation } from '../backend/useTranslation.ts';
 
 {/* Horizontal bar version */ }
 export default function RatingHistogram() {
   const [binCount, setBinCount] = useState(5);
   const [histogramData, setHistogramData] = useState<number[]>([]);
   const [ratings, setRatings] = useState<RatingData[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadHistogram = async () => {
-      // Check if analytics should be shown based on settings
-      const savedSettings = localStorage.getItem('trust-o-meter-settings');
-      let showAnalytics = true;
-      
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        showAnalytics = settings.showAnalytics ?? true;
-      }
+      const ratings: RatingData[] = await searchRatings();
+      setRatings(ratings);
 
-      if (showAnalytics) {
-        const ratings: RatingData[] = await searchRatings();
-        setRatings(ratings);
+      const bins = new Array(binCount).fill(0);
+      const binSize = 5/binCount;
 
-        const bins = new Array(binCount).fill(0);
-        const binSize = 5/binCount;
+      ratings.forEach(r => {
+        const index = Math.min(Math.floor(r.rating / binSize), binCount - 1);
+        bins[index]++;
+      });
 
-        ratings.forEach(r => {
-          const index = Math.min(Math.floor(r.rating / binSize), binCount - 1);
-          bins[index]++;
-        });
-
-        setHistogramData(bins);
-      } else {
-        // Show empty histogram if analytics are disabled
-        setRatings([]);
-        setHistogramData(new Array(binCount).fill(0));
-      }
+      setHistogramData(bins);
     }
 
     loadHistogram();
@@ -49,12 +35,12 @@ export default function RatingHistogram() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-6">{t('ratingDistribution')}</h2>
+      <h2 className="text-2xl font-bold text-white mb-6">{t.analytics.ratingDistribution}</h2>
 
       {/* Bin Slider */}
       <div className="mb-6">
         <label htmlFor="bin-slider" className="text-white font-medium mr-4">
-          {t('numberOfBins')}: {binCount}
+          {t.analytics.numberOfBins}: {binCount}
         </label>
         <input
           id="bin-slider"
