@@ -196,7 +196,7 @@ const HomePage: React.FC = () => {
                 <div>
                   <h3 className="font-inter font-bold text-xl text-white dark:text-gray-100 mb-3">{r.eventName}</h3>
                 </div>
-                <div className=" flex gap-3">
+                <div className="flex gap-3">
                   {[...Array(5)].map((_, i) => {
                     const fill = Math.min(Math.max(r.rating - i, 0), 1) * 100;
                     return (
@@ -207,6 +207,8 @@ const HomePage: React.FC = () => {
                         >
                           <Star className={`w-6 h-6 fill-yellow-400`} />
                         </div>
+
+                        <Star className='text-gray-400 hover:text-gray-300'/>
                       </div>
                     );
                   })}

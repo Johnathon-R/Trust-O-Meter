@@ -3,8 +3,9 @@ import { BarChart3, Star, TrendingUp, Users, Calendar, RefreshCw, Sparkles } fro
 import StarRating from '../components/StarRating';
 import RatingHistogram from '../components/histogram';
 import { getRatingsData } from '../backend/functionality';
-import { RatingStats } from '../utils/customTypes';
-import { t, getCurrentLanguage } from '../utils/i18n';
+import { searchRatings } from '../backend/algorand';
+import { RatingStats, RatingData } from '../utils/customTypes';
+import { t } from '../utils/i18n';
 
 // Floating dot component
 const FloatingDotsBackground = React.memo(() => {
@@ -37,10 +38,18 @@ const AnalyticsPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [ratings, setRatings] = useState<RatingData[]>([]);
 
   useEffect(() => {
     setIsVisible(true);
     loadRatingsData();
+
+    const fetchRatings = async () => {
+      const data = await searchRatings();
+      setRatings(data);
+    };
+
+    fetchRatings();
   }, []);
 
   const loadRatingsData = async () => {
@@ -127,7 +136,25 @@ const AnalyticsPage: React.FC = () => {
                 {stats.averageRating.toFixed(1)}
               </h3>
               <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t('averageRating')}</p>
-              <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => { }} readonly size="sm" />
+              <div>
+                <div className="flex gap-3">
+                  {[...Array(5)].map((_, i) => {
+                    const fill = Math.min(Math.max(stats.averageRating - i, 0), 1) * 100;
+                    return (
+                      <div key={i} className="relative w-6 h-6">
+                        {/* Filled star (foreground mask) */}
+                        <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
+                          style={{ width: `${fill}%` }}
+                        >
+                          <Star className={`w-6 h-6 fill-yellow-400`} />
+                        </div>
+
+                        <Star className='text-gray-400 hover:text-gray-300'/>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -195,7 +222,24 @@ const AnalyticsPage: React.FC = () => {
                 >
                   <div className="flex items-center space-x-4">
                     <div className="group-hover/item:scale-110 transition-transform duration-300">
-                      <StarRating rating={rating.rating} onRatingChange={() => { }} readonly size="sm" />
+                      <div className="flex gap-3">
+                        {[...Array(5)].map((_, i) => {
+                          const fill = Math.min(Math.max(rating.rating - i, 0), 1) * 100;
+                          return (
+                            <div key={i} className="relative w-6 h-6">
+                              {/* Filled star (foreground mask) */}
+                              <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
+                                style={{ width: `${fill}%` }}
+                              >
+                                <Star className={`w-6 h-6 fill-yellow-400`} />
+
+                              </div>
+
+                              <Star className='text-gray-400 hover:text-gray-300'/>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                     <div>
                       <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>
