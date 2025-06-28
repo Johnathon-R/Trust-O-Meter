@@ -184,7 +184,7 @@ const AnalyticsPage: React.FC = () => {
                 <TrendingUp className="w-5 h-5 text-green-400 dark:text-green-300" />
               </div>
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
-                {stats.averageRating.toFixed(2)}
+                {stats.averageRating.toFixed(1)}
               </h3>
               <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t.analytics.averageRating}</p>
                <div className="flex gap-3">
