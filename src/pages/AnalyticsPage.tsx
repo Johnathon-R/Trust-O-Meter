@@ -185,10 +185,26 @@ const AnalyticsPage: React.FC = () => {
                 <TrendingUp className="w-5 h-5 text-green-400 dark:text-green-300" />
               </div>
               <h3 className="font-inter font-bold text-3xl text-white dark:text-gray-100 mb-1">
-                {stats.averageRating.toFixed(1)}
+                {stats.averageRating.toFixed(2)}
               </h3>
               <p className="font-inter text-gray-300 dark:text-gray-400 mb-3">{t.analytics.averageRating}</p>
-              <StarRating rating={Math.round(stats.averageRating)} onRatingChange={() => { }} readonly size="sm" />
+               <div className="flex gap-3">
+                {[...Array(5)].map((_, i) => {
+                  const fill = Math.min(Math.max(stats.averageRating - i, 0), 1) * 100;
+                  return (
+                    <div key={i} className="relative w-6 h-6">
+                      {/* Filled star (foreground mask) */}
+                      <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
+                        style={{ width: `${fill}%` }}
+                      >
+                        <Star className={`w-6 h-6 fill-yellow-400`} />
+                      </div>
+
+                      <Star className='text-gray-400'/>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -249,14 +265,30 @@ const AnalyticsPage: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              {stats.recentRatings.map((rating, index) => (
+              {stats.recentRatings.slice(0, 9).map((rating, index) => (
                 <div
                   key={index}
                   className="group/item flex items-center justify-between p-4 bg-white/5 dark:bg-gray-700/40 rounded-xl border border-white/10 dark:border-gray-600/50 hover:bg-white/10 dark:hover:bg-gray-600/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
                 >
                   <div className="flex items-center space-x-4">
                     <div className="group-hover/item:scale-110 transition-transform duration-300">
-                      <StarRating rating={rating.rating} onRatingChange={() => { }} readonly size="sm" />
+                       <div className="flex gap-3">
+                        {[...Array(5)].map((_, i) => {
+                          const fill = Math.min(Math.max(rating.rating - i, 0), 1) * 100;
+                          return (
+                            <div key={i} className="relative w-6 h-6">
+                              {/* Filled star (foreground mask) */}
+                              <div className="absolute top-0 left-0 h-full overflow-hidden text-yellow-400"
+                                style={{ width: `${fill}%` }}
+                              >
+                                <Star className={`w-6 h-6 fill-yellow-400`} />
+                              </div>
+      
+                              <Star className='text-gray-400'/>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                     <div>
                       <p className="font-inter font-semibold text-white dark:text-gray-100">{rating.eventName}</p>
