@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, BarChart3, Shield, ArrowRight, Sparkles, Zap } from 'lucide-react';
-import { RatingData } from '../utils/customTypes';
-import { searchRatings } from '../backend/algorand';
 import { useTranslation } from '../backend/useTranslation.ts';
 import { getSetting } from '../utils/settings';
+import { getRatingsData } from '../backend/functionality';
+import { RatingStats } from '../utils/customTypes';
 
 const HomePage: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [ratings, setRatings] = useState<RatingData[]>([]);
+  const [stats, setStats] = useState<RatingStats>({
+    averageRating: 0,
+    totalRatings: 0,
+    recentRatings: [],
+    ratingDistribution: [],
+  });
   const [showAnalytics, setShowAnalytics] = useState(true);
   const { t } = useTranslation();
 
@@ -17,14 +22,13 @@ const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchRatings = async () => {
-      const data = await searchRatings();
-      setRatings(data);
+    const loadStats = async () => {
+      const data = await getRatingsData();
+      if (data) setStats(data);
     };
 
-    fetchRatings();
-    
-    // Check analytics setting
+    loadStats();
+
     const analyticsEnabled = getSetting('showAnalytics');
     setShowAnalytics(analyticsEnabled);
   }, []);
@@ -72,16 +76,6 @@ const HomePage: React.FC = () => {
             <div className="w-2 h-2 bg-white rounded-full opacity-30"></div>
           </div>
         ))}
-      </div>
-
-      {/** Powered by logo */}
-      <div className="absolute top-4 right-4 z-50 flex gap-4">
-        {/* Box 1 */}
-        <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-md border border-white/20 dark:border-gray-700/50 rounded-xl px-4 py-2 flex items-center gap-2">
-          <span className="text-sm text-white dark:text-gray-200 font-inter">Powered by</span>
-          <img src="/images/logo-black.png" alt="Algorand" className="h-6 w-auto" />
-          <img src="/images/white_circle_360x360.png" alt="Bolt.new" className="h-6 w-auto" />
-        </div>
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4">
@@ -183,24 +177,20 @@ const HomePage: React.FC = () => {
             <div className={`mt-20 grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               <div className="text-center group">
                 <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {Math.round(ratings.length * 1.2 + 10)}
+                  {Math.round(stats.totalRatings * 1.2 + 10)}
                 </div>
                 <div className="text-gray-400 dark:text-gray-500 font-inter">{t.home.stats.activeUsers}</div>
               </div>
               <div className="text-center group">
                 <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {ratings.length}
+                  {stats.totalRatings}
                 </div>
                 <div className="text-gray-400 dark:text-gray-500 font-inter">{t.home.stats.totalRatings}</div>
               </div>
               <div className="text-center group">
                 <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400 mb-2 group-hover:scale-110 transition-transform duration-300">
-                  {ratings.length > 0
-                    ? (Math.round(
-                        (ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length) * 100
-                      ) / 100).toFixed(1)
-                    : 'N/A'}★
-                  </div>
+                  {stats.averageRating.toFixed(1)}★
+                </div>
                 <div className="text-gray-400 dark:text-gray-500 font-inter">{t.home.stats.averageRating}</div>
               </div>
             </div>
@@ -210,10 +200,10 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* Rating Cards Section - Only show if analytics is enabled */}
-      {showAnalytics && ratings.length > 0 && (
+      {showAnalytics &&   stats.totalRatings > 0 && (
         <div className={`grid mx-auto max-w-6xl sm:grid-cols-3 gap-8 mb-16 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          {ratings.slice(0,9).map(r => (
-            <div key={r.id} className="group relative flex-col">
+          {stats.recentRatings.slice(0, 9).map((r, idx) => (
+            <div key={r.id || `${r.eventName}-${idx}`} className="group relative flex-col">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-75 transition-all duration-300 group-hover:blur-md"></div>
               <div className="relative bg-white/10 dark:bg-gray-800/50 backdrop-blur-lg border border-white/20 dark:border-gray-700/50 rounded-2xl p-8 hover:bg-white/20 dark:hover:bg-gray-800/70 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
                 <div>

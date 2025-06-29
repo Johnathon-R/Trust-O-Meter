@@ -3,6 +3,7 @@ import { Settings, Bell, Shield, Moon, Sun, Download } from 'lucide-react';
 import { searchRatings } from '../backend/algorand';
 import { RatingData } from '../utils/customTypes';
 import { useTranslation } from '../backend/useTranslation.ts';
+import TopRightBadge from '../components/TopRightBadge';
 
 const SettingsPage: React.FC = () => {
   const [notifications, setNotifications] = useState(true);

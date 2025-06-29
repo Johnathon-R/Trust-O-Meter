@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Shield, Star, BarChart3, Info, Users, Settings, Menu, X } from 'lucide-react';
+import { Shield, Star, BarChart3, Info, Users, Settings, Menu, X, Zap } from 'lucide-react';
 import { useTranslation } from '../backend/useTranslation.ts';
 
 const Navigation: React.FC = () => {
@@ -25,7 +25,6 @@ const Navigation: React.FC = () => {
           <Link 
             to="/" 
             className="group flex items-center space-x-3 text-white hover:text-blue-400 transition-all duration-300"
-
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -60,8 +59,17 @@ const Navigation: React.FC = () => {
             ))}
           </div>
 
+          {/* Powered by logo - Desktop */}
+          <div className="hidden md:flex items-center">
+            <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-md border border-white/20 dark:border-gray-700/50 rounded-xl px-4 py-2 flex items-center gap-2">
+              <span className="text-sm text-white dark:text-gray-200 font-inter">Powered by</span>
+              <img src="/images/logo-black.png" alt="Algorand" className="h-6 w-auto" />
+              <img src="/images/white_circle_360x360.png" alt="Bolt.new" className="h-6 w-auto" />
+            </div>
+          </div>
+
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all duration-300"
@@ -94,6 +102,15 @@ const Navigation: React.FC = () => {
                   <span className="font-inter font-medium">{label}</span>
                 </Link>
               ))}
+              
+              {/* Mobile Powered by Badge in Menu */}
+              <div className="px-4 py-2">
+                <div className="bg-white/10 dark:bg-gray-800/50 backdrop-blur-md border border-white/20 dark:border-gray-700/50 rounded-xl px-4 py-3 flex items-center gap-2">
+                  <span className="text-sm text-white dark:text-gray-200 font-inter">Powered by</span>
+                  <img src="/images/logo-black.png" alt="Algorand" className="h-6 w-auto" />
+                  <img src="/images/white_circle_360x360.png" alt="Bolt.new" className="h-6 w-auto" />
+                </div>
+              </div>
             </div>
           </div>
         )}

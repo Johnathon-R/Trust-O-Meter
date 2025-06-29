@@ -5,6 +5,7 @@ import { getRatingsData } from '../backend/functionality';
 import { RatingStats } from '../utils/customTypes';
 import { useTranslation } from '../backend/useTranslation.ts';
 import { getSetting } from '../utils/settings';
+import { Link } from 'react-router-dom';
 
 // Floating dot component
 const FloatingDotsBackground = React.memo(() => {
@@ -134,10 +135,10 @@ const AnalyticsPage: React.FC = () => {
                 <p className="font-inter text-gray-400 dark:text-gray-500 text-sm mb-6">
                   To view analytics data, you can enable "Show in Analytics" in your Settings.
                 </p>
-                <a href="/settings" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-inter font-medium hover:from-orange-700 hover:to-red-700 transition-all duration-300 hover:scale-105 hover:shadow-lg">
+                <Link to="/settings" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-inter font-medium hover:from-orange-700 hover:to-red-700 transition-all duration-300 hover:scale-105 hover:shadow-lg">
                   <span>Go to Settings</span>
                   <Lock className="w-4 h-4" />
-                </a>
+                </Link>
               </div>
             </div>
           </div>
