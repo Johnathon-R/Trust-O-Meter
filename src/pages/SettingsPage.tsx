@@ -42,7 +42,6 @@ const SettingsPage: React.FC = () => {
       const settings = JSON.parse(savedSettings);
       setNotifications(settings.notifications ?? true);
       setLanguage(settings.language ?? 'en');
-      setShowAnalytics(settings.showAnalytics ?? true);
     }
 
     // Check if dark mode is already enabled
