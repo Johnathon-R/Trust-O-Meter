@@ -41,7 +41,6 @@ const SettingsPage: React.FC = () => {
     if (savedSettings) {
       const settings = JSON.parse(savedSettings);
       setNotifications(settings.notifications ?? true);
-      setDarkMode(settings.darkMode ?? false);
       setLanguage(settings.language ?? 'en');
       setShowAnalytics(settings.showAnalytics ?? true);
     }
